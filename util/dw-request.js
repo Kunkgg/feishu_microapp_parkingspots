@@ -92,28 +92,20 @@ function ttGetAppAccessToken() {
   });
 }
 
-// function ttCode2Session() {
-//   Promise.all([ttLogin(), ttGetAppAccessToken()]).then(res => {
-//     var data = { code: res[0].code };
-//     var auth = `Bearer ${res[1].data.app_access_token}`;
-//     var postRequest = dwPromisify(tt.request);
-//     console.log(res.length);
-//     console.log(res[0]);
-//     console.log(res[1]);
-//     console.log(data);
-//     console.log(auth);
-//     console.log(apiUrl_code2session);
-//     return postRequest({
-//       url: apiUrl_code2session,
-//       method: "POST",
-//       data: data,
-//       header: {
-//         "content-type": "application/json",
-//         Authorization: auth
-//       }
-//     });
-//   });
-// }
+function ttCode2Session(code, app_access_token) {
+  var data = { code: code };
+  var auth = `Bearer ${app_access_token}`;
+  var postRequest = dwPromisify(tt.request);
+  return postRequest({
+    url: apiUrl_code2session,
+    method: "POST",
+    data: data,
+    header: {
+      "content-type": "application/json",
+      Authorization: auth
+    }
+  });
+}
 
 module.exports = {
   postRequest: postRequest,
@@ -123,6 +115,6 @@ module.exports = {
   ttGetUserInfo: ttGetUserInfo,
   ttGetSystemInfo: ttGetSystemInfo,
   ttGetAppAccessToken: ttGetAppAccessToken,
-  // ttCode2Session: ttCode2Session,
+  ttCode2Session: ttCode2Session,
   dwPromisify: dwPromisify
 };
