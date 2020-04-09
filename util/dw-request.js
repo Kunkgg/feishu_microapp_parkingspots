@@ -1,3 +1,7 @@
+const apiUrl_app_access_token = require("../config.js").apiUrl_app_access_token;
+const apiUrl_code2session = require("../config.js").apiUrl_code2session;
+const config = require("../config.js").config;
+
 function dwPromisify(fn) {
   return function(obj = {}) {
     return new Promise((resolve, reject) => {
@@ -42,7 +46,7 @@ function postRequest(url, data = {}) {
     method: "POST",
     data: data,
     header: {
-      "content-type": "application/x-www-form-urlencoded"
+      "content-type": "application/json"
     }
   });
 }
@@ -76,11 +80,49 @@ function ttGetSystemInfo() {
   return dwPromisify(tt.getSystemInfo);
 }
 
+function ttGetAppAccessToken() {
+  var postRequest = dwPromisify(tt.request);
+  return postRequest({
+    url: apiUrl_app_access_token,
+    method: "POST",
+    data: config,
+    header: {
+      "content-type": "application/json"
+    }
+  });
+}
+
+// function ttCode2Session() {
+//   Promise.all([ttLogin(), ttGetAppAccessToken()]).then(res => {
+//     var data = { code: res[0].code };
+//     var auth = `Bearer ${res[1].data.app_access_token}`;
+//     var postRequest = dwPromisify(tt.request);
+//     console.log(res.length);
+//     console.log(res[0]);
+//     console.log(res[1]);
+//     console.log(data);
+//     console.log(auth);
+//     console.log(apiUrl_code2session);
+//     return postRequest({
+//       url: apiUrl_code2session,
+//       method: "POST",
+//       data: data,
+//       header: {
+//         "content-type": "application/json",
+//         Authorization: auth
+//       }
+//     });
+//   });
+// }
+
 module.exports = {
   postRequest: postRequest,
   getRequest: getRequest,
   doThen: doThen,
-  wxLogin: ttLogin,
-  wxGetUserInfo: ttGetUserInfo,
-  wxGetSystemInfo: ttGetSystemInfo
+  ttLogin: ttLogin,
+  ttGetUserInfo: ttGetUserInfo,
+  ttGetSystemInfo: ttGetSystemInfo,
+  ttGetAppAccessToken: ttGetAppAccessToken,
+  // ttCode2Session: ttCode2Session,
+  dwPromisify: dwPromisify
 };
