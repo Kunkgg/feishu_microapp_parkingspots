@@ -1,0 +1,41 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  justify-content: space-between;
+  font-size: 32rpx;
+  font-family: -apple-system-font,Helvetica Neue,Helvetica,sans-serif;
+}
+
+.parkings {
+  margin: 60rpx auto;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  max-width: 90%;
+  border: black 2px solid;
+  justify-content: center;
+}
+
+.parking-item {
+  width: 200rpx;
+  height: 300rpx;
+  font-size: 26rpx;
+  margin: 20rpx;
+  text-align: center;
+  border-radius: 10rpx;
+  background-color: gray;
+}
+
+.idel {
+  background-color: greenyellow;
+}
+
+.summary {
+  padding: 60rpx 50rpx 80rpx;
+  text-align: center;
+}
+
+.summary text {
+  text-align: center;
+}
