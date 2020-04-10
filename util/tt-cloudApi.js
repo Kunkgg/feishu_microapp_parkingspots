@@ -1,36 +1,87 @@
 const dwPromisify = require("./dw-request").dwPromisify;
-const apiUrl_rootmeta =
-  "https://open.feishu.cn/open-apis/drive/explorer/v2/root_folder/meta";
 
 const defaultSheetToken = require("../config.js").sheetToken;
 const defaultFolderToken = require("../config.js").folderToken;
 
-// console.log(apiUrl_newFolder);
-folderNew();
+// === Make api Url === {{{
+const apiUrl_base = "https://open.feishu.cn/open-apis";
+const apiUrl_baseFloder = `${apiUrl_base}/drive/explorer/v2/folder/`;
+const apiUrl_baseFile = `${apiUrl_base}/drive/explorer/v2/file/`;
+const apiUrl_basePerm = `${apiUrl_base}/drive/permission/`;
+const apiUrl_baseSheet = `${apiUrl_base}/sheet/v2/spreadsheets/`;
 
-function apiUrl_sheetMeta(sheetToken) {
-  return (
-    "https://open.feishu.cn/open-apis/sheet/v2/spreadsheets/" +
-    sheetToken +
-    "/metainfo"
-  );
-}
+const apiUrl_rootMeta = `${apiUrl_base}/drive/explorer/v2/root_folder/meta`;
+const apiUrl_permList = `${apiUrl_basePerm}/member/list`;
 
 function apiUrl_folderNew(parentFolderToken) {
-  return (
-    "https://open.feishu.cn/open-apis/drive/explorer/v2/folder/" +
-    parentFolderToken
-  );
+  return apiUrl_baseFloder + parentFolderToken;
 }
 
-// === API folder ===
+function apiUrl_folderMeta(FolderToken) {
+  return apiUrl_baseFloder + FolderToken + "/meta";
+}
+
+function apiUrl_folderList(FolderToken) {
+  return apiUrl_baseFloder + FolderToken + "/children";
+}
+
+function apiUrl_fileNew(parentFolderToken) {
+  return apiUrl_baseFile + parentFolderToken;
+}
+
+function apiUrl_fileCopy(srcFileToken) {
+  return apiUrl_baseFile + "copy/files/" + srcFileToken;
+}
+
+function apiUrl_fileDelDoc(docToken) {
+  return apiUrl_baseFile + "docs/" + docToken;
+}
+
+function apiUrl_fileDelSheet(sheetToken) {
+  return apiUrl_baseFile + "spreadsheets/" + sheetToken;
+}
+
+function apiUrl_sheetMeta(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/metainfo";
+}
+
+function apiUrl_sheetReadRange(range, sheetToken, toString = false) {
+  var url = apiUrl_baseSheet + sheetToken + "/values/" + range;
+
+  if (toString) {
+    return url + "&valueRenderOption=ToString";
+  } else {
+    return url;
+  }
+}
+
+function apiUrl_sheetReadRanges(ranges, sheetToken, toString = false) {
+  ranges = "ranges=" + ranges.join(",");
+  var url = apiUrl_baseSheet + sheetToken + "/values_batch_get?" + ranges;
+
+  if (toString) {
+    return url + "&valueRenderOption=ToString";
+  } else {
+    return url;
+  }
+}
+
+function apiUrl_sheetWriteRange(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/values";
+}
+
+function apiUrl_sheetWriteRanges(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/values_batch_update";
+}
+
+// ======}}}
+
+// === API folder === {{{
+
 function rootMeta(access_token) {
   var auth = `Bearer ${access_token}`;
-  var getRequest = dwPromisify(tt.request);
-  console.log(apiUrl_rootmeta);
-  console.log(auth);
-  return getRequest({
-    url: apiUrl_rootmeta,
+  return dwPromisify(tt.request)({
+    url: apiUrl_rootMeta,
     method: "GET",
     header: {
       "Content-Type": "application/json",
@@ -39,15 +90,28 @@ function rootMeta(access_token) {
   });
 }
 
-function folderNew(access_token, parentFolderToken = defaultFolderToken) {
+function folderMeta(access_token, folderToken = defaultFolderToken) {
   var auth = `Bearer ${access_token}`;
-  var postRequest = dwPromisify(tt.request);
+  return dwPromisify(tt.request)({
+    url: apiUrl_folderMeta(folderToken),
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function folderNew(
+  access_token,
+  title = "ParkingSpots",
+  parentFolderToken = defaultFolderToken
+) {
+  var auth = `Bearer ${access_token}`;
   var data = {
-    title: "ParkingLot",
+    title: title,
   };
-  console.log(apiUrl_folderNew(parentFolderToken));
-  console.log(auth);
-  return postRequest({
+  return dwPromisify(tt.request)({
     url: apiUrl_folderNew(parentFolderToken),
     method: "POST",
     data: data,
@@ -58,12 +122,122 @@ function folderNew(access_token, parentFolderToken = defaultFolderToken) {
   });
 }
 
+function folderList(access_token, folderToken = defaultFolderToken) {
+  var auth = `Bearer ${access_token}`;
+  return dwPromisify(tt.request)({
+    url: apiUrl_folderList(folderToken),
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+// ======}}}
+
+// === API file === {{{
+
+function fileNew(
+  access_token,
+  title,
+  type,
+  parentFolderToken = defaultFolderToken
+) {
+  // type: "sheet" or "doc"
+  var auth = `Bearer ${access_token}`;
+  var data = {
+    title: title,
+    type: type,
+  };
+  return dwPromisify(tt.request)({
+    url: apiUrl_fileNew(parentFolderToken),
+    method: "POST",
+    data: data,
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function fileCopy(
+  access_token,
+  srcFileToken,
+  type,
+  dstName,
+  dstFolderToken = defaultFolderToken,
+  permissionNeeded = true,
+  CommentNeeded = true
+) {
+  // type: "sheet" or "doc"
+  var auth = `Bearer ${access_token}`;
+  var data = {
+    type: type,
+    dstFolderToken: dstFolderToken,
+    dstName: dstName,
+    permissionNeeded: permissionNeeded,
+    CommentNeeded: CommentNeeded,
+  };
+  return dwPromisify(tt.request)({
+    url: apiUrl_fileCopy(srcFileToken),
+    method: "POST",
+    data: data,
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function fileDel(access_token, fileToken, type) {
+  // type: "sheet" or "doc"
+  if (type == "doc") {
+    var url = apiUrl_fileDelDoc(fileToken);
+  } else if (type == "sheet") {
+    var url = apiUrl_fileDelSheet(fileToken);
+  } else {
+    throw "fileDel failed: type Error";
+  }
+  console.log(url);
+
+  var auth = `Bearer ${access_token}`;
+  return dwPromisify(tt.request)({
+    url: url,
+    method: "DELETE",
+    data: {},
+    header: {
+      Authorization: auth,
+    },
+  });
+}
+// ======}}}
+
+// === API permission === {{{
+function permList(access_token, type = "sheet", fileToken = defaultSheetToken) {
+  // type: "sheet" or "doc" or "file"
+  var data = {
+    token: fileToken,
+    type: type,
+  };
+  var auth = `Bearer ${access_token}`;
+  return dwPromisify(tt.request)({
+    url: apiUrl_permList,
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+// ======}}}
+
+// === API sheet === {{{
 function sheetMeta(access_token, sheetToken = defaultSheetToken) {
   var auth = `Bearer ${access_token}`;
-  var getRequest = dwPromisify(tt.request);
-  console.log(apiUrl_sheetMeta(sheetToken));
-  console.log(auth);
-  return getRequest({
+  return dwPromisify(tt.request)({
     url: apiUrl_sheetMeta(sheetToken),
     method: "GET",
     header: {
@@ -73,28 +247,109 @@ function sheetMeta(access_token, sheetToken = defaultSheetToken) {
   });
 }
 
-// function postRequest(url, data = {}) {
-//   var postRequest = dwPromisify(tt.request);
-//   return postRequest({
-//     url: url,
-//     method: "POST",
-//     data: data,
-//     header: {
-//       "content-type": "application/json"
-//     }
-//   });
-// }
+function sheetReadRange(
+  access_token,
+  range,
+  sheetToken = defaultSheetToken,
+  toString = false
+) {
+  var auth = `Bearer ${access_token}`;
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetReadRange(range, sheetToken, toString),
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function sheetReadRanges(
+  access_token,
+  ranges,
+  sheetToken = defaultSheetToken,
+  toString = false
+) {
+  // ranges: strings array
+  var auth = `Bearer ${access_token}`;
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetReadRanges(ranges, sheetToken, toString),
+    method: "GET",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function sheetWriteRange(
+  access_token,
+  range,
+  values,
+  sheetToken = defaultSheetToken
+) {
+  // values: [[v, v, v...], [v, v, v...]]
+  var data = {
+    valueRange: {
+      range: range,
+      values: values,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetWriteRange(sheetToken),
+    data: data,
+    method: "PUT",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function sheetWriteRanges(
+  access_token,
+  ranges,
+  valuesList,
+  sheetToken = defaultSheetToken
+) {
+  // values: [[v, v, v...], [v, v, v...]]
+  // ranges.length should equal vaules_list.length
+  var data = { valueRanges: [] };
+  var i;
+  for (i = 0; i < ranges.length; i++) {
+    data.valueRanges.push({ range: ranges[i], values: valuesList[i] });
+  }
+  var auth = `Bearer ${access_token}`;
+
+  console.log(JSON.stringify(data));
+  console.log(apiUrl_sheetWriteRanges(sheetToken));
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetWriteRanges(sheetToken),
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+// ======}}}
 
 module.exports = {
-  sheetMeta: sheetMeta,
   rootMeta: rootMeta,
   folderNew: folderNew,
-  // getRequest: getRequest,
-  // doThen: doThen,
-  // ttLogin: ttLogin,
-  // ttGetUserInfo: ttGetUserInfo,
-  // ttGetSystemInfo: ttGetSystemInfo,
-  // ttGetAppAccessToken: ttGetAppAccessToken,
-  // ttCode2Session: ttCode2Session,
-  // dwPromisify: dwPromisify
+  folderMeta: folderMeta,
+  folderList: folderList,
+  fileNew: fileNew,
+  fileCopy: fileCopy,
+  fileDel: fileDel,
+  permList: permList,
+  sheetMeta: sheetMeta,
+  sheetReadRange: sheetReadRange,
+  sheetReadRanges: sheetReadRanges,
+  sheetWriteRange: sheetWriteRange,
+  sheetWriteRanges: sheetWriteRanges,
 };
