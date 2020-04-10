@@ -1,15 +1,14 @@
 <view class="container">
-  <view class="summary">当前空闲车位 {{ idelCounter }}</view>
   <view class="parkings">
-    <view tt:for="{{parking_spaces}}"
-          tt:key="{{item.id}}" 
-          id="{{item.id}}"
-          class="parking-item {{!item.status ? 'idel' : ''}}"
-          bindtap="carMove">
-          车位 {{item.id}}
+    <view tt:for="{{spots}}"
+          tt:key="{{item[0]}}"
+          id="{{item[0]}}"
+          class="parking-item {{!item[2] ? 'idel' : ''}}"
+          bindtap="carmove">
+          车位 {{item[0]}}
     </view>
   </view>
   <view tt:if="{{ showmsg }}">
-    This is a test msg.
+    this is a test msg.
   </view>
 </view>

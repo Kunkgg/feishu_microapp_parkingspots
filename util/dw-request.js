@@ -114,9 +114,9 @@ function ttCode2Session(code, app_access_token) {
 }
 
 function login(app) {
-  Promise.all([ttLogin(), ttGetAppAccessToken()])
+  return Promise.all([ttLogin(), ttGetAppAccessToken()])
     .then((res) => {
-      console.log(res[0].code);
+      // console.log(res[0].code);
       return ttCode2Session(res[0].code, res[1].data.app_access_token);
     })
     .then((res) => {
@@ -135,6 +135,6 @@ module.exports = {
   ttGetSystemInfo: ttGetSystemInfo,
   ttGetAppAccessToken: ttGetAppAccessToken,
   ttCode2Session: ttCode2Session,
-  login: login,
   dwPromisify: dwPromisify,
+  login: login,
 };
