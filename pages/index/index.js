@@ -1,19 +1,22 @@
+const dwRequest = require("../../util/dw-request.js");
+const ttCloudApi = require("../../util/tt-cloudApi.js");
+
 const app = getApp();
 Page({
   data: {
     parking_spaces: [
       {
         id: "P1",
-        status: ""
+        status: "",
       },
       {
         id: "P2",
-        status: ""
-      }
+        status: "",
+      },
     ],
-    showmsg: false
+    showmsg: false,
   },
-  carMove: function(e) {
+  carMove: function (e) {
     var id = e.currentTarget.id,
       parking_spaces = this.data.parking_spaces;
 
@@ -27,11 +30,11 @@ Page({
       }
     }
     this.setData({
-      parking_spaces: parking_spaces
+      parking_spaces: parking_spaces,
     });
     this.updateIdelCounter();
   },
-  updateIdelCounter: function() {
+  updateIdelCounter: function () {
     var idelCounter = 0;
     for (var i = 0, len = this.data.parking_spaces.length; i < len; ++i) {
       if (!this.data.parking_spaces[i].status) {
@@ -40,11 +43,13 @@ Page({
     }
 
     this.setData({
-      idelCounter: idelCounter
+      idelCounter: idelCounter,
     });
     // console.log(this.data.idelCounter)
   },
-  onLoad: function() {
+  onLoad: function () {
+    dwRequest.login(app);
+
     this.updateIdelCounter();
-  }
+  },
 });

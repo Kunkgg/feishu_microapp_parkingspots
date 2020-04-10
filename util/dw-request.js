@@ -113,6 +113,19 @@ function ttCode2Session(code, app_access_token) {
   });
 }
 
+function login(app) {
+  Promise.all([ttLogin(), ttGetAppAccessToken()])
+    .then((res) => {
+      console.log(res[0].code);
+      return ttCode2Session(res[0].code, res[1].data.app_access_token);
+    })
+    .then((res) => {
+      // console.log(`in page, ${res.data.data.access_token}`);
+      app.user_access_token = res.data.data.access_token;
+      // console.log(`in app, ${res.data.data.access_token}`);
+    });
+}
+
 module.exports = {
   postRequest: postRequest,
   getRequest: getRequest,
@@ -122,5 +135,6 @@ module.exports = {
   ttGetSystemInfo: ttGetSystemInfo,
   ttGetAppAccessToken: ttGetAppAccessToken,
   ttCode2Session: ttCode2Session,
+  login: login,
   dwPromisify: dwPromisify,
 };
