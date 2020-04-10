@@ -1,15 +1,21 @@
-const apiUrl_app_access_token = require("../config.js").apiUrl_app_access_token;
-const apiUrl_code2session = require("../config.js").apiUrl_code2session;
 const config = require("../config.js").config;
 
+var apiUrl_app_access_token =
+  "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal/";
+var apiUrl_code2session =
+  "https://open.feishu.cn/open-apis/mina/v2/tokenLoginValidate";
+
+/**
+ * 构造 Promise
+ */
 function dwPromisify(fn) {
-  return function(obj = {}) {
+  return function (obj = {}) {
     return new Promise((resolve, reject) => {
-      obj.success = function(res) {
+      obj.success = function (res) {
         //成功
         resolve(res);
       };
-      obj.fail = function(res) {
+      obj.fail = function (res) {
         //失败
         reject(res);
       };
@@ -29,8 +35,8 @@ function getRequest(url, data = {}) {
     method: "GET",
     data: data,
     header: {
-      "Content-Type": "application/json"
-    }
+      "Content-Type": "application/json",
+    },
   });
 }
 
@@ -46,8 +52,8 @@ function postRequest(url, data = {}) {
     method: "POST",
     data: data,
     header: {
-      "content-type": "application/json"
-    }
+      "content-type": "application/json",
+    },
   });
 }
 
@@ -87,8 +93,8 @@ function ttGetAppAccessToken() {
     method: "POST",
     data: config,
     header: {
-      "content-type": "application/json"
-    }
+      "content-type": "application/json",
+    },
   });
 }
 
@@ -102,8 +108,8 @@ function ttCode2Session(code, app_access_token) {
     data: data,
     header: {
       "content-type": "application/json",
-      Authorization: auth
-    }
+      Authorization: auth,
+    },
   });
 }
 
@@ -116,5 +122,5 @@ module.exports = {
   ttGetSystemInfo: ttGetSystemInfo,
   ttGetAppAccessToken: ttGetAppAccessToken,
   ttCode2Session: ttCode2Session,
-  dwPromisify: dwPromisify
+  dwPromisify: dwPromisify,
 };
