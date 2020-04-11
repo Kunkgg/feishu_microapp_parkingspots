@@ -10,40 +10,40 @@ const app = getApp();
 Page({
   onLoad: function () {
     var that = this;
-    dwRequest
-      .login(app)
-      .then(() => {
-        that.setData({
-          hasLogin: true,
-        });
-        app.globalData.hasLogin = true;
-        console.log("Login Success");
-
-        dwRequest.ttGetUserInfo().then((res) => {
-          that.setData({
-            hasUserInfo: true,
-            userInfo: res.userInfo,
-          });
-          console.log("Got userInfo Success");
-        });
-
-        return ttCloudApi.sheetReadRanges(
-          app.globalData.user_access_token,
-          ranges
-        );
-      })
-      .then((res) => {
-        that.setData({
-          spots: res.data.data.valueRanges[0].values,
-          cars: res.data.data.valueRanges[1].values,
-        });
-        console.log("Loaded data from cloud:");
-        console.log(that.data);
+    dwRequest.login(app).then(() => {
+      that.setData({
+        hasLogin: true,
       });
+      app.globalData.hasLogin = true;
+      console.log("Login Success");
+
+      // get userInfo
+      dwRequest.ttGetUserInfo().then((res) => {
+        that.setData({
+          hasUserInfo: true,
+          userInfo: res.userInfo,
+        });
+        console.log("Got userInfo Success");
+      });
+
+      // load data from cloud
+      ttCloudApi
+        .sheetReadRanges(app.globalData.user_access_token, ranges)
+        .then((res) => {
+          that.setData({
+            spots: res.data.data.valueRanges[0].values,
+            cars: res.data.data.valueRanges[1].values,
+          });
+          console.log("Loaded data from cloud:");
+          console.log(that.data);
+        });
+    });
   },
   data: {
     // spots: [[id, name, status, lastEditor, mtime],...]
     // cars: [[id, plate],...]
+    // hasLogin
+    // userInfo
   },
 
   carMove: function (e) {
@@ -63,5 +63,16 @@ Page({
     that.setData({
       spots: spots,
     });
+
+    ttCloudApi
+      .sheetWriteRange(
+        app.globalData.user_access_token,
+        rangeSpots,
+        that.data.spots
+      )
+      .then(() => {
+        console.log("Update spots success:");
+        console.log(that.data.spots);
+      });
   },
 });
