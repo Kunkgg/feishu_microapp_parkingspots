@@ -85,7 +85,7 @@ function ttGetUserInfo() {
  * 获取系统信息
  */
 function ttGetSystemInfo() {
-  return dwPromisify(tt.getSystemInfo);
+  return dwPromisify(tt.getSystemInfo)();
 }
 
 function ttGetAppAccessToken() {
@@ -151,6 +151,19 @@ function ttShowModal(
   });
 }
 
+function ttShowLoading(title, mask = false) {
+  console.log("Showing loading...");
+  return dwPromisify(tt.showLoading)({
+    title: title,
+    mask: mask,
+  });
+}
+
+function ttHideToast() {
+  console.log("Hide Toast");
+  return dwPromisify(tt.hideToast)();
+}
+
 module.exports = {
   postRequest: postRequest,
   getRequest: getRequest,
@@ -164,4 +177,6 @@ module.exports = {
   login: login,
   ttShowActionSheet: ttShowActionSheet,
   ttShowModal: ttShowModal,
+  ttShowLoading: ttShowLoading,
+  ttHideToast: ttHideToast,
 };

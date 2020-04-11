@@ -10,6 +10,7 @@ const app = getApp();
 Page({
   onLoad: function () {
     var that = this;
+    dwRequest.ttShowLoading("Loading...", true);
     dwRequest.login(app).then(() => {
       that.setData({
         hasLogin: true,
@@ -43,6 +44,7 @@ Page({
           });
           console.log("Loaded data from cloud:");
           console.log(that.data);
+          dwRequest.ttHideToast();
         });
     });
   },
