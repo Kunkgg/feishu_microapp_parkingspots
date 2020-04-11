@@ -7,6 +7,14 @@ const ranges = [rangeSpots, rangeCars];
 
 const app = getApp();
 
+// TODO: checksession reduce reload time
+// TODO: Fix time two digital
+// TODO: Style
+// TODO: filter of used plate
+// TODO: refactor
+// TODO: release
+// TODO: share file link and introduce
+
 Page({
   onLoad: function () {
     var that = this;
