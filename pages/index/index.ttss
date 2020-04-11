@@ -23,7 +23,6 @@ body {
 .container {
   display: flex;
   flex-direction: row;
-  /* min-height: 100%; */
   justify-content: space-between;
   font-size: 32rpx;
   max-width: 94%;
@@ -38,18 +37,16 @@ body {
   background: white;
   box-shadow: 5rpx 5rpx 15rpx rgba(0, 0, 0, 0.9);
   font-family: "Noto Sans SC", sans-serif;
-  /* font-family: roboto; */
   text-align: center;
   margin: 40rpx 20rpx;
 }
 
 .card-lastEditor {
   grid-area: lastEditor;
-  background: url("../../images/img5.jpg");
-  /* background: rgb(255, 7, 110); */
+  background: rgb(255, 7, 110);
+  background-size: cover;
   border-top-left-radius: 15rpx;
   border-top-right-radius: 15rpx;
-  background-size: cover;
 
   padding: 10rpx;
   display: flex;
@@ -61,7 +58,8 @@ body {
 
 .card-lastEditor .avatar image {
   border-radius: 50%;
-  box-shadow: 5rpx 5rpx 15rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 5rpx 5rpx 15rpx rgba(0, 0, 0, 0.9);
+  /* box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2); */
   width: 72rpx;
   height: 72rpx;
 }
@@ -107,7 +105,8 @@ body {
   font-weight: 500;
 }
 
-.idel .card-name {
+.idel .card-name,
+.idel .card-lastEditor {
   background: rgb(0, 189, 63);
 }
 

@@ -1,7 +1,7 @@
 // const sheetToken = "shtcnTNuG88jU9y2Ldfp9ZgjjUb";
 const sheetToken = "shtcniUwsF4rGBfJTenE7JuNmWg";
 const folderToken = "fldcnQ7Qa7RosZTqvzaHveun0og";
-const rangeSpots = "5a3db1!A2:E3";
+const rangeSpots = "5a3db1!A2:F3";
 const rangeCars = "pcnBE5!A2:B4";
 
 var config = {

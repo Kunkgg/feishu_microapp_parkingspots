@@ -1,0 +1,20 @@
+<template name="spotCard">
+  <view
+    id="{{ item[0] }}"
+    class="card {{ !item[2] ? 'idel' : '' }}"
+    bindtap="carMove" >
+    <view class="card-lastEditor">
+      <view class="avatar">
+        <image src="{{item[4][0].text}}" alt="avatar" />
+      </view>
+      <view class="nickname">{{ item[3] }}</view>
+    </view>
+    <view class="card-text">
+      <view class="status">{{ item[2] ? item[2] : "空闲" }}</view>
+      <view class="mtime">{{ item[5] }}</view>
+    </view>
+    <view class="card-name">
+      <view class="spotname">{{ item[1] }}</view>
+    </view>
+  </view>
+</template>

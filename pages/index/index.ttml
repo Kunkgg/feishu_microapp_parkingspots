@@ -1,56 +1,9 @@
-<view class="header">衡建技术车位管理</view>
-<view class="container">
-  <view class="card">
-    <view class="card-lastEditor">
-      <view class="avatar">
-        <image
-          src="https://lf3-ttcdn-tos.pstatp.com/img/lark.avatar/531a1ff2-0d93-4a74-a831-61411a073edg~72x72.png"
-          alt="avatar"
-        />
-      </view>
-      <view class="nickname">苟坤</view>
-    </view>
-    <view class="card-text">
-      <!-- <view class="mtime">2020/4/11 13:24:50</view> -->
-      <view class="status">陕AF19967</view>
-      <view class="mtime">2020/4/11 13:24:50</view>
-    </view>
-    <view class="card-name">
-      <view class="spotname">D-101</view>
-    </view>
-  </view>
+<import src="spotCard.ttml"/>
 
-  <view class="card idel">
-    <view class="card-lastEditor">
-      <view class="avatar">
-        <image
-          src="https://lf3-ttcdn-tos.pstatp.com/img/lark.avatar/531a1ff2-0d93-4a74-a831-61411a073edg~72x72.png"
-          alt="avatar"
-        />
-      </view>
-      <view class="nickname">苟坤</view>
-    </view>
-    <view class="card-text">
-      <!-- <view class="mtime">2020/4/11 13:24:50</view> -->
-      <view class="status">陕AF19967</view>
-      <view class="mtime">2020/4/11 13:24:50</view>
-    </view>
-    <view class="card-name">
-      <view class="spotname">D-101</view>
-    </view>
-  </view>
+<view class="header">衡建技术车位管理</view>
+
+<view class="container">
+    <block tt:for="{{spots}}">
+        <template is="spotCard" data="{{item}}"/>
+    </block>
 </view>
-<!-- <view class="container"> -->
-<!--   <view class="parkings"> -->
-<!--     <view tt:for="{{spots}}" -->
-<!--           tt:key="{{item[0]}}" -->
-<!--           id="{{item[0]}}" -->
-<!--           class="parking-item {{!item[2] ? 'idel' : ''}}" -->
-<!--           bindtap="carMove"> -->
-<!--           车位 {{item[0]}} -->
-<!--     </view> -->
-<!--   </view> -->
-<!--   <view tt:if="{{ showmsg }}"> -->
-<!--     this is a test msg. -->
-<!--   </view> -->
-<!-- </view> -->

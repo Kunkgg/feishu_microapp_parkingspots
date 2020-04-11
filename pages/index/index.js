@@ -40,7 +40,7 @@ Page({
     });
   },
   data: {
-    // spots: [[id, name, status, lastEditor, mtime],...]
+    // spots: [[id, name, status, lastEditor, lastEditorAvatar, mtime],...]
     // cars: [[id, plate],...]
     // hasLogin
     // userInfo
