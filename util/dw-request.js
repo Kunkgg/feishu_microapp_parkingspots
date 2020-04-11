@@ -129,6 +129,28 @@ function login(app) {
     });
 }
 
+function ttShowActionSheet(itemList) {
+  console.log("Showing action sheet...");
+  return dwPromisify(tt.showActionSheet)({ itemList });
+}
+
+function ttShowModal(
+  title,
+  content,
+  confirmText = "确定",
+  cancelText = "取消",
+  showCancel = true
+) {
+  console.log("Showing modal...");
+  return dwPromisify(tt.showModal)({
+    title: title,
+    content: content,
+    confirmText: confirmText,
+    cancelText: cancelText,
+    showCancel: showCancel,
+  });
+}
+
 module.exports = {
   postRequest: postRequest,
   getRequest: getRequest,
@@ -140,4 +162,6 @@ module.exports = {
   ttCode2Session: ttCode2Session,
   dwPromisify: dwPromisify,
   login: login,
+  ttShowActionSheet: ttShowActionSheet,
+  ttShowModal: ttShowModal,
 };
