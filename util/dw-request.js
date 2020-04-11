@@ -68,6 +68,7 @@ function doThen(fn) {
  * 飞书用户登录,获取code
  */
 function ttLogin() {
+  console.log("Getting login code...");
   return dwPromisify(tt.login)();
 }
 
@@ -76,6 +77,7 @@ function ttLogin() {
  * 注意:须在登录之后调用
  */
 function ttGetUserInfo() {
+  console.log("Getting userInfo...");
   return dwPromisify(tt.getUserInfo)();
 }
 
@@ -87,6 +89,7 @@ function ttGetSystemInfo() {
 }
 
 function ttGetAppAccessToken() {
+  console.log("Getting app_access_token...");
   var postRequest = dwPromisify(tt.request);
   return postRequest({
     url: apiUrl_app_access_token,
@@ -116,12 +119,12 @@ function ttCode2Session(code, app_access_token) {
 function login(app) {
   return Promise.all([ttLogin(), ttGetAppAccessToken()])
     .then((res) => {
-      // console.log(res[0].code);
+      console.log("Got login code and app_access_token");
       return ttCode2Session(res[0].code, res[1].data.app_access_token);
     })
     .then((res) => {
       // console.log(`in page, ${res.data.data.access_token}`);
-      app.user_access_token = res.data.data.access_token;
+      app.globalData.user_access_token = res.data.data.access_token;
       // console.log(`in app, ${res.data.data.access_token}`);
     });
 }

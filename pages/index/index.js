@@ -8,66 +8,60 @@ const ranges = [rangeSpots, rangeCars];
 const app = getApp();
 
 Page({
-  data: {
-    // spots: spots,
-    // cars: cars,
-  },
-  // parking_spaces: [
-  //   {
-  //     id: "P1",
-  //     status: "",
-  //   },
-  //   {
-  //     id: "P2",
-  //     status: "",
-  //   },
-  // ],
-  // showmsg: false,
-  // carMove: function (e) {
-  //   var id = e.currentTarget.id,
-  //     parking_spaces = this.data.parking_spaces;
-
-  //   for (var i = 0, len = parking_spaces.length; i < len; ++i) {
-  //     if (parking_spaces[i].id == id) {
-  //       if (parking_spaces[i].status) {
-  //         parking_spaces[i].status = "";
-  //       } else {
-  //         parking_spaces[i].status = "busy";
-  //       }
-  //     }
-  //   }
-  //   this.setData({
-  //     parking_spaces: parking_spaces,
-  //   });
-  //   this.updateIdelCounter();
-  // },
-  // updateIdelCounter: function () {
-  //   var idelCounter = 0;
-  //   for (var i = 0, len = this.data.spots.length; i < len; ++i) {
-  //     if (!this.data.spots[i][2]) {
-  //       idelCounter++;
-  //     }
-  //   }
-
-  //   this.setData({
-  //     idelCounter: idelCounter,
-  //   });
-  //   // console.log(this.data.idelCounter)
-  // },
   onLoad: function () {
+    var that = this;
     dwRequest
       .login(app)
       .then(() => {
-        return ttCloudApi.sheetReadRanges(app.user_access_token, ranges);
+        that.setData({
+          hasLogin: true,
+        });
+        app.globalData.hasLogin = true;
+        console.log("Login Success");
+
+        dwRequest.ttGetUserInfo().then((res) => {
+          that.setData({
+            hasUserInfo: true,
+            userInfo: res.userInfo,
+          });
+          console.log("Got userInfo Success");
+        });
+
+        return ttCloudApi.sheetReadRanges(
+          app.globalData.user_access_token,
+          ranges
+        );
       })
       .then((res) => {
-        var spots = res.data.data.valueRanges[0].values;
-        var cars = res.data.data.valueRanges[1].values;
-        this.setData({
-          spots: spots,
-          cars: cars,
+        that.setData({
+          spots: res.data.data.valueRanges[0].values,
+          cars: res.data.data.valueRanges[1].values,
         });
-        console.log(this.data);
+        console.log("Loaded data from cloud:");
+        console.log(that.data);
       });
+  },
+  data: {
+    // spots: [[id, name, status, lastEditor, mtime],...]
+    // cars: [[id, plate],...]
+  },
+
+  carMove: function (e) {
+    var that = this;
+    var id = e.currentTarget.id;
+    var spots = that.data.spots;
+
+    for (var i = 0, len = spots.length; i < len; ++i) {
+      if (spots[i][0] == id) {
+        if (spots[i][2]) {
+          spots[i][2] = "";
+        } else {
+          spots[i][2] = "busy";
+        }
+      }
+    }
+    that.setData({
+      spots: spots,
+    });
   },
 });

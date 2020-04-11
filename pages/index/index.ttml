@@ -4,7 +4,7 @@
           tt:key="{{item[0]}}"
           id="{{item[0]}}"
           class="parking-item {{!item[2] ? 'idel' : ''}}"
-          bindtap="carmove">
+          bindtap="carMove">
           车位 {{item[0]}}
     </view>
   </view>

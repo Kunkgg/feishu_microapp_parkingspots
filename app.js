@@ -1,5 +1,40 @@
 App({
-  onLaunch() {},
+  onLaunch: function (args) {
+    console.log("App Launch");
+    console.log(args.query);
+  },
+  onShow: function (args) {
+    console.log("App Show");
+    console.log(args);
+    console.log("-------------");
+    // check the update of mini program
+    let updateManager = tt.getUpdateManager();
+    updateManager.onCheckForUpdate((result) => {
+      console.log("is there any update?：" + result.hasUpdate);
+    });
+    updateManager.onUpdateReady((result) => {
+      tt.showModal({
+        title: "Update infomation",
+        content: "new version is ready, do you want to restart app?",
+        success: (res) => {
+          console.log(JSON.stringify(res));
+          if (res.confirm) {
+            updateManager.applyUpdate();
+          }
+        },
+      });
+    });
+    updateManager.onUpdateFailed((result) => {
+      console.log("mini program update failed");
+    });
+  },
+  onHide: function () {
+    console.log("App Hide");
+  },
+  globalData: {
+    hasLogin: false,
+    openid: null,
+  },
 });
 
 // console.log(`code: ${res.data.code}`);
