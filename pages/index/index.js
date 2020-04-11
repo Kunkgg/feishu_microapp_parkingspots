@@ -68,12 +68,50 @@ Page({
       });
   },
 
+  updateSpotUserInfo: function (spot) {
+    spot[3] = this.data.userInfo.nickName;
+    spot[4] = this.data.userInfo.avatarUrl;
+  },
+
+  updateSpotStatus: function (spot, status) {
+    spot[2] = status;
+  },
+
+  updateSpotDateTime: function (spot) {
+    var today = new Date();
+    var date =
+      today.getFullYear() +
+      "/" +
+      (today.getMonth() + 1) +
+      "/" +
+      today.getDate();
+    var time =
+      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date + " " + time;
+
+    spot[5] = dateTime;
+  },
+  updateSpotAll: function (spot, status) {
+    this.updateSpotStatus(spot, status);
+    this.updateSpotUserInfo(spot);
+    this.updateSpotDateTime(spot);
+  },
+
+  updateSpots: function (targetIndex, status) {
+    var spots = this.data.spots;
+    this.updateSpotAll(spots[targetIndex], status);
+
+    this.setData({
+      spots: spots,
+    });
+  },
+
   carOut: function (targetIndex) {
     var that = this;
     var spots = that.data.spots;
     var spot = spots[targetIndex];
     var prompt_title = "确认提示";
-    var prompt_content = `将牌照  ${spot[2]} 车辆移出车位 ${spot[1]} ?`;
+    var prompt_content = `将牌照 ${spot[2]} 车辆移出车位 ${spot[1]} ?`;
     console.log("Here is carOut...");
     console.log(`targetIndex: ${targetIndex}`);
 
@@ -81,20 +119,17 @@ Page({
       .ttShowModal(prompt_title, prompt_content)
       .then(({ confirm, cancel }) => {
         if (confirm) {
-          spots[targetIndex][2] = "";
+          that.updateSpots(targetIndex, "");
 
           // TODO filter used plates
-          // TODO set lastEditor and mtime
-          that.setData({
-            spots: spots,
-          });
           console.log("carOut successed");
         }
         if (cancel) {
           console.log("carOut canceled");
         }
       })
-      .then(that.updateCloudSpots);
+      .then(that.updateCloudSpots)
+      .then(that.onLoad);
   },
 
   carIn: function (targetIndex) {
@@ -105,14 +140,10 @@ Page({
     dwRequest
       .ttShowActionSheet(that.data.plates)
       .then((res) => {
-        var spots = that.data.spots;
-        spots[targetIndex][2] = that.data.plates[res.tapIndex];
-        // TODO set lastEditor and mtime
-        that.setData({
-          spots: spots,
-        });
+        that.updateSpots(targetIndex, that.data.plates[res.tapIndex]);
       })
-      .then(that.updateCloudSpots);
+      .then(that.updateCloudSpots)
+      .then(that.onLoad);
   },
 
   carMove: function (e) {
