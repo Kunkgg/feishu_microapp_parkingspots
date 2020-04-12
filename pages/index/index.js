@@ -1,5 +1,6 @@
 const dwRequest = require("../../util/dw-request.js");
 const ttCloudApi = require("../../util/tt-cloudApi.js");
+const util = require("../../util/util.js");
 
 const rangeSpots = require("../../config.js").rangeSpots;
 const rangeCars = require("../../config.js").rangeCars;
@@ -7,13 +8,14 @@ const ranges = [rangeSpots, rangeCars];
 
 const app = getApp();
 
-// TODO: checksession reduce reload time
-// TODO: Fix time two digital
 // TODO: Style
-// TODO: filter of used plate
 // TODO: refactor
 // TODO: release
 // TODO: share file link and introduce
+// TODO: record car move history
+// TODO: tab for chat of car move history
+// TODO: management tab for adding or delete information of car and spot by admin
+// TODO: make full feishu api
 
 Page({
   onLoad: function () {
@@ -118,16 +120,7 @@ Page({
   },
 
   updateSpotDateTime: function (spot) {
-    var today = new Date();
-    var date =
-      today.getFullYear() +
-      "/" +
-      (today.getMonth() + 1) +
-      "/" +
-      today.getDate();
-    var time =
-      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    var dateTime = date + " " + time;
+    var dateTime = util.nowDateTime();
 
     spot[5] = dateTime;
   },
@@ -146,6 +139,16 @@ Page({
     });
   },
 
+  unUsedPlates: function () {
+    var usedPlates = this.data.spots.map((spot) => {
+      return spot[2];
+    });
+
+    return this.data.plates.filter((plate) => {
+      return !usedPlates.includes(plate);
+    });
+  },
+
   carOut: function (targetIndex) {
     var that = this;
     var spots = that.data.spots;
@@ -161,7 +164,6 @@ Page({
         if (confirm) {
           that.updateSpots(targetIndex, "");
 
-          // TODO filter used plates
           console.log("carOut successed");
         }
         if (cancel) {
@@ -173,13 +175,14 @@ Page({
 
   carIn: function (targetIndex) {
     var that = this;
+    var unUsedPlates = this.unUsedPlates();
     console.log("Here is carIn...");
     console.log(`targetIndex: ${targetIndex}`);
 
     dwRequest
-      .ttShowActionSheet(that.data.plates)
+      .ttShowActionSheet(unUsedPlates)
       .then((res) => {
-        that.updateSpots(targetIndex, that.data.plates[res.tapIndex]);
+        that.updateSpots(targetIndex, unUsedPlates[res.tapIndex]);
       })
       .then(that.updateCloudSpots);
   },
