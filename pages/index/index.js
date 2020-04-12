@@ -18,43 +18,26 @@ const app = getApp();
 Page({
   onLoad: function () {
     var that = this;
+
+    // start loading animate
     dwRequest.ttShowLoading("Loading...", true);
-    dwRequest.login(app).then(() => {
-      that.setData({
-        hasLogin: true,
-      });
-      app.globalData.hasLogin = true;
-      console.log("Login Success");
+    if (this.data.hasLogin) {
+      console.log("Already login");
 
-      // get userInfo
-      dwRequest.ttGetUserInfo().then((res) => {
+      that.loadUserInfo();
+      that.loadCloudData();
+    } else {
+      dwRequest.login(app).then(() => {
         that.setData({
-          hasUserInfo: true,
-          userInfo: res.userInfo,
+          hasLogin: true,
         });
-        console.log("Got userInfo Success");
+        app.globalData.hasLogin = true;
+        console.log("Login Success");
+
+        that.loadUserInfo();
+        that.loadCloudData();
       });
-
-      // load data from cloud
-      ttCloudApi
-        .sheetReadRanges(app.globalData.user_access_token, ranges)
-        .then((res) => {
-          // extra plates from cars sheet
-          var plates = [];
-          res.data.data.valueRanges[1].values.forEach((car) => {
-            plates.push(car[1]);
-          });
-
-          that.setData({
-            spots: res.data.data.valueRanges[0].values,
-            cars: res.data.data.valueRanges[1].values,
-            plates: plates,
-          });
-          console.log("Loaded data from cloud:");
-          console.log(that.data);
-          dwRequest.ttHideToast();
-        });
-    });
+    }
   },
   data: {
     // spots: [[id, name, status, lastEditor, lastEditorAvatar, mtime],...]
@@ -63,8 +46,52 @@ Page({
     // userInfo
   },
 
+  loadUserInfo: function () {
+    var that = this;
+
+    if (this.data.hasUserInfo) {
+      console.log("Already loaded userInfo");
+    } else {
+      // get userInfo
+      dwRequest.ttGetUserInfo().then((res) => {
+        that.setData({
+          hasUserInfo: true,
+          userInfo: res.userInfo,
+        });
+        console.log("Loaded userInfo Success");
+      });
+    }
+  },
+
+  loadCloudData: function () {
+    var that = this;
+
+    // load data from cloud
+    ttCloudApi
+      .sheetReadRanges(app.globalData.user_access_token, ranges)
+      .then((res) => {
+        // extra plates from cars sheet
+        var plates = [];
+        res.data.data.valueRanges[1].values.forEach((car) => {
+          plates.push(car[1]);
+        });
+
+        that.setData({
+          spots: res.data.data.valueRanges[0].values,
+          cars: res.data.data.valueRanges[1].values,
+          plates: plates,
+        });
+        console.log("Loaded data from cloud:");
+        console.log(that.data);
+
+        // stop loading animate
+        dwRequest.ttHideToast();
+      });
+  },
+
   updateCloudSpots: function () {
     var that = this;
+
     // write current spots to cloud
     ttCloudApi
       .sheetWriteRange(
@@ -75,6 +102,9 @@ Page({
       .then(() => {
         console.log("Update spots success:");
         console.log(that.data.spots);
+
+        // reload page after update spots
+        that.onLoad();
       });
   },
 
@@ -138,8 +168,7 @@ Page({
           console.log("carOut canceled");
         }
       })
-      .then(that.updateCloudSpots)
-      .then(that.onLoad);
+      .then(that.updateCloudSpots);
   },
 
   carIn: function (targetIndex) {
@@ -152,8 +181,7 @@ Page({
       .then((res) => {
         that.updateSpots(targetIndex, that.data.plates[res.tapIndex]);
       })
-      .then(that.updateCloudSpots)
-      .then(that.onLoad);
+      .then(that.updateCloudSpots);
   },
 
   carMove: function (e) {
