@@ -1,5 +1,6 @@
 const dwRequest = require("../../util/dw-request.js");
 const ttCloudApi = require("../../util/tt-cloudApi.js");
+const ttClientApi = require("../../util/tt-clientApi.js");
 const util = require("../../util/util.js");
 
 const rangeSpots = require("../../config.js").rangeSpots;
@@ -8,7 +9,6 @@ const ranges = [rangeSpots, rangeCars];
 
 const app = getApp();
 
-// TODO: refactor
 // TODO: release
 // TODO: share file link and introduce
 // TODO: record car move history
@@ -21,14 +21,14 @@ Page({
     var that = this;
 
     // start loading animate
-    dwRequest.ttShowLoading("Loading...", true);
+    ttClientApi.ttShowLoading("Loading...", true);
     if (this.data.hasLogin) {
       console.log("Already login");
 
       that.loadUserInfo();
       that.loadCloudData();
     } else {
-      dwRequest.login(app).then(() => {
+      ttClientApi.login(app).then(() => {
         that.setData({
           hasLogin: true,
         });
@@ -54,7 +54,7 @@ Page({
       console.log("Already loaded userInfo");
     } else {
       // get userInfo
-      dwRequest.ttGetUserInfo().then((res) => {
+      ttClientApi.ttGetUserInfo().then((res) => {
         that.setData({
           hasUserInfo: true,
           userInfo: res.userInfo,
@@ -86,7 +86,7 @@ Page({
         console.log(that.data);
 
         // stop loading animate
-        dwRequest.ttHideToast();
+        ttClientApi.ttHideToast();
       });
   },
 
@@ -157,7 +157,7 @@ Page({
     console.log("Here is carOut...");
     console.log(`targetIndex: ${targetIndex}`);
 
-    dwRequest
+    ttClientApi
       .ttShowModal(prompt_title, prompt_content)
       .then(({ confirm, cancel }) => {
         if (confirm) {
@@ -178,7 +178,7 @@ Page({
     console.log("Here is carIn...");
     console.log(`targetIndex: ${targetIndex}`);
 
-    dwRequest
+    ttClientApi
       .ttShowActionSheet(unUsedPlates)
       .then((res) => {
         that.updateSpots(targetIndex, unUsedPlates[res.tapIndex]);
