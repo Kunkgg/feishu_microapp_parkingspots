@@ -34,9 +34,7 @@ body {
   grid-template-rows: 210rpx 210rpx 80rpx;
   grid-template-areas: "lastEditor" "text" "name";
   border-radius: 18rpx;
-  /* grey */
-  background: #f5f6f7;
-  /* box-shadow: 5rpx 5rpx 15rpx rgba(0, 0, 0, 0.9); */
+  background: #f5f6f7; /* grey */
   box-shadow: 0 2.8rpx 2.2rpx rgba(0, 0, 0, 0.034),
     0 6.7rpx 5.3rpx rgba(0, 0, 0, 0.048), 0 12.5rpx 10rpx rgba(0, 0, 0, 0.06),
     0 22.3rpx 17.9rpx rgba(0, 0, 0, 0.072),

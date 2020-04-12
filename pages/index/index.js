@@ -9,7 +9,6 @@ const ranges = [rangeSpots, rangeCars];
 
 const app = getApp();
 
-// TODO: release
 // TODO: share file link and introduce
 // TODO: record car move history
 // TODO: tab for chat of car move history
