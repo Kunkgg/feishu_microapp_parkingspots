@@ -8,7 +8,6 @@ const ranges = [rangeSpots, rangeCars];
 
 const app = getApp();
 
-// TODO: Style
 // TODO: refactor
 // TODO: release
 // TODO: share file link and introduce
