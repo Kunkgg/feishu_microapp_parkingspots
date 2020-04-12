@@ -1,6 +1,6 @@
 <import src="spotCard.ttml"/>
 
-<view class="header">衡建技术车位信息共享</view>
+<view class="header">建衡技术车位信息共享</view>
 
 <view class="container">
     <block tt:for="{{spots}}">
