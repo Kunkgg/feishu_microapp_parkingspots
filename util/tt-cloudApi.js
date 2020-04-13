@@ -74,6 +74,21 @@ function apiUrl_sheetWriteRanges(sheetToken) {
   return apiUrl_baseSheet + sheetToken + "/values_batch_update";
 }
 
+function apiUrl_sheetInsertData(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/values_prepend";
+}
+
+function apiUrl_sheetAppendData(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/values_append";
+}
+
+function apiUrl_sheetInsertLines(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/insert_dimension_range";
+}
+
+function apiUrl_sheetLines(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/dimension_range";
+}
 // ======}}}
 
 // === API folder === {{{
@@ -336,6 +351,121 @@ function sheetWriteRanges(
     },
   });
 }
+
+function sheetInsertData(
+  access_token,
+  range,
+  values,
+  sheetToken = defaultSheetToken
+) {
+  // values: [[v, v, v...], [v, v, v...]]
+  var data = {
+    valueRange: {
+      range: range,
+      values: values,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetInsertData(sheetToken),
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function sheetAppendData(
+  access_token,
+  range,
+  values,
+  sheetToken = defaultSheetToken
+) {
+  // values: [[v, v, v...], [v, v, v...]]
+  var data = {
+    valueRange: {
+      range: range,
+      values: values,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetAppendData(sheetToken),
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function sheetInsertLines(
+  access_token,
+  sheetId,
+  startIndex,
+  endIndex,
+  majorDimension = "ROWS",
+  inheritStyle = "",
+  sheetToken = defaultSheetToken
+) {
+  // startIndex, endIndex: int
+  // majorDimension: "ROWS" / "COLUMNS"
+  // inheritStyle: "" / "BEFORE" / "AFTER"
+  var data = {
+    dimension: {
+      sheetId: sheetId,
+      majorDimension: majorDimension,
+      startIndex: startIndex,
+      endIndex: endIndex,
+    },
+    inheritStyle: inheritStyle,
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetInsertLines(sheetToken),
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+function sheetAppendLines(
+  access_token,
+  sheetId,
+  length,
+  majorDimension = "ROWS",
+  sheetToken = defaultSheetToken
+) {
+  // length: int
+  // majorDimension: "ROWS" / "COLUMNS"
+  var data = {
+    dimension: {
+      sheetId: sheetId,
+      majorDimension: majorDimension,
+      length: length,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetLines(sheetToken),
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
 // ======}}}
 
 module.exports = {
@@ -352,4 +482,8 @@ module.exports = {
   sheetReadRanges: sheetReadRanges,
   sheetWriteRange: sheetWriteRange,
   sheetWriteRanges: sheetWriteRanges,
+  sheetInsertData: sheetInsertData,
+  sheetAppendData: sheetAppendData,
+  sheetInsertLines: sheetInsertLines,
+  sheetAppendLines: sheetAppendLines,
 };
