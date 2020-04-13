@@ -437,6 +437,7 @@ function sheetInsertLines(
     },
   });
 }
+
 function sheetAppendLines(
   access_token,
   sheetId,
@@ -466,6 +467,76 @@ function sheetAppendLines(
   });
 }
 
+function sheetUpdateLines(
+  access_token,
+  sheetId,
+  startIndex,
+  endIndex,
+  fixedSize,
+  visible = true,
+  majorDimension = "ROWS",
+  sheetToken = defaultSheetToken
+) {
+  // startIndex, endIndex: int
+  // majorDimension: "ROWS" / "COLUMNS"
+  // fixedSize: int, while majorDimension is ROWS, this meaning the line height
+  // visible: bool
+  var data = {
+    dimension: {
+      sheetId: sheetId,
+      majorDimension: majorDimension,
+      startIndex: startIndex,
+      endIndex: endIndex,
+    },
+    dimensionProperties: {
+      fixedSize: fixedSize,
+      visible: visible,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetLines(sheetToken),
+    data: data,
+    method: "PUT",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
+function sheetDelLines(
+  access_token,
+  sheetId,
+  startIndex,
+  endIndex,
+  majorDimension = "ROWS",
+  sheetToken = defaultSheetToken
+) {
+  // startIndex, endIndex: int
+  // majorDimension: "ROWS" / "COLUMNS"
+  var data = {
+    dimension: {
+      sheetId: sheetId,
+      majorDimension: majorDimension,
+      startIndex: startIndex,
+      endIndex: endIndex,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetLines(sheetToken),
+    data: data,
+    method: "DELETE",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
 // ======}}}
 
 module.exports = {
@@ -486,4 +557,6 @@ module.exports = {
   sheetAppendData: sheetAppendData,
   sheetInsertLines: sheetInsertLines,
   sheetAppendLines: sheetAppendLines,
+  sheetUpdateLines: sheetUpdateLines,
+  sheetDelLines: sheetDelLines,
 };

@@ -38,7 +38,7 @@ Page({
       // });
 
       ttCloudApi
-        .sheetAppendLines(token, sheetIdTest, 5)
+        .sheetDelLines(token, sheetIdTest, 15, 18)
         .then((res) => {
           console.log(res.data);
           var str = JSON.stringify(res.data, undefined, 4);

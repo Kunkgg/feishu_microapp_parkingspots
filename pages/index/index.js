@@ -3,9 +3,20 @@ const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const util = require("../../util/util.js");
 
-const rangeSpots = require("../../config.js").rangeSpots;
-const rangeCars = require("../../config.js").rangeCars;
-const ranges = [rangeSpots, rangeCars];
+const config = require("../../config.js").config;
+
+const sheetIdSpots = config.sheetIds.spots;
+const sheetIdCars = config.sheetIds.cars;
+const sheetIdTest = config.sheetIds.test;
+const sheetIdHistory = config.sheetIds.history;
+
+console.log("-----------------");
+console.log("Loaded config ...");
+console.log(sheetIdSpots);
+console.log(sheetIdCars);
+console.log(sheetIdTest);
+console.log(sheetIdHistory);
+console.log("-----------------");
 
 const app = getApp();
 
@@ -45,6 +56,7 @@ Page({
     // cars: [[id, plate],...]
     // hasLogin
     // userInfo
+    // hasSheetMeta
   },
 
   loadUserInfo: function () {
@@ -59,17 +71,66 @@ Page({
           hasUserInfo: true,
           userInfo: res.userInfo,
         });
+        app.globalData.hasUserInfo = true;
+        app.globalData.userInfo = res.userInfo;
         console.log("Loaded userInfo Success");
       });
+    }
+  },
+
+  loadSheetMeta: function () {
+    var that = this;
+
+    if (!that.hasSheetMeta) {
+      return ttCloudApi
+        .sheetMeta(app.globalData.user_access_token)
+        .then((res) => {
+          var sheetMeta = res.data.data;
+
+          // make spots and cars sheet range
+          var lastColSpots = util.columnCharName(
+            sheetMeta.sheets[0].columnCount
+          );
+          var lastRowSpots = sheetMeta.sheets[0].rowCount;
+          var lastColCars = util.columnCharName(
+            sheetMeta.sheets[1].columnCount
+          );
+          var lastRowCars = sheetMeta.sheets[1].rowCount;
+          var rangeSpots = `${sheetIdSpots}!A2:${lastColSpots}${lastRowSpots}`;
+          var rangeCars = `${sheetIdCars}!A2:${lastColCars}${lastRowCars}`;
+          var ranges = [rangeSpots, rangeCars];
+
+          that.setData({
+            hasSheetMeta: true,
+            sheetMeta: sheetMeta,
+            ranges: ranges,
+          });
+
+          app.globalData.hasSheetMeta = true;
+          app.globalData.sheetMeta = sheetMeta;
+          console.log("Loaded sheetMeta Success");
+        });
+    } else {
+      var p = new Promise(function (resolve) {
+        resolve(console.log("Already had sheetMeta"));
+      });
+      return p;
     }
   },
 
   loadCloudData: function () {
     var that = this;
 
-    // load data from cloud
-    ttCloudApi
-      .sheetReadRanges(app.globalData.user_access_token, ranges)
+    // get sheetMeta for making data ranges
+    that
+      .loadSheetMeta()
+      .then(() => {
+        // load data from cloud
+        return ttCloudApi.sheetReadRanges(
+          app.globalData.user_access_token,
+          that.data.ranges
+        );
+      })
       .then((res) => {
         // extra plates from cars sheet
         var plates = [];
@@ -82,9 +143,10 @@ Page({
           cars: res.data.data.valueRanges[1].values,
           plates: plates,
         });
+        console.log("-----------------");
         console.log("Loaded data from cloud:");
         console.log(that.data);
-
+        console.log("-----------------");
         // stop loading animate
         ttClientApi.ttHideToast();
       });
@@ -97,13 +159,14 @@ Page({
     ttCloudApi
       .sheetWriteRange(
         app.globalData.user_access_token,
-        rangeSpots,
+        that.data.ranges[0],
         that.data.spots
       )
       .then(() => {
+        console.log("-----------------");
         console.log("Update spots success:");
         console.log(that.data.spots);
-
+        console.log("-----------------");
         // reload page after update spots
         that.onLoad();
       });

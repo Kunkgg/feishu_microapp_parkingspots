@@ -53,8 +53,13 @@ function nowDateTime() {
   return dateTime;
 }
 
+function columnCharName(n) {
+  return String.fromCharCode(64 + n);
+}
+
 module.exports = {
   formatTime: formatTime,
   formatLocation: formatLocation,
   nowDateTime: nowDateTime,
+  columnCharName: columnCharName,
 };
