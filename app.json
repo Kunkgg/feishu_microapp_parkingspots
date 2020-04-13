@@ -1,9 +1,35 @@
 {
-  "pages": ["pages/index/index"],
+  "pages": ["pages/index/index", "pages/analysis/index"],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "",
     "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#ed4040",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "images/icon_status.png",
+        "selectedIconPath": "images/icon_status_HL.png",
+        "text": "Status"
+      },
+      {
+        "pagePath": "pages/analysis/index",
+        "iconPath": "images/icon_analysis.png",
+        "selectedIconPath": "images/icon_analysis_HL.png",
+        "text": "Analysis"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 10000,
+    "connectSocket": 10000,
+    "uploadFile": 10000,
+    "downloadFile": 10000
   }
 }

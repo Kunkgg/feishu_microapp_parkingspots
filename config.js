@@ -1,7 +1,12 @@
 const sheetToken = "shtcniUwsF4rGBfJTenE7JuNmWg";
 const folderToken = "fldcnQ7Qa7RosZTqvzaHveun0og";
-const rangeSpots = "5a3db1!A2:F3";
-const rangeCars = "pcnBE5!A2:B4";
+
+const sheetIdSpots = "5a3db1";
+const sheetIdCars = "pcnBE5";
+const sheetIdHistory = "O8jw1C";
+
+var rangeSpots = `${sheetIdSpots}!A2:F3`;
+var rangeCars = `${sheetIdCars}!A2:B4`;
 
 var config = {
   app_id: "cli_9e071c8f77b1d00d",

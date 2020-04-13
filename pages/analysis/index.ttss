@@ -1,0 +1,128 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap");
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url("../../images/background.jpg");
+  overflow: hidden;
+  color: #f5f6f7; /* grey */
+}
+
+.header {
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 32rpx;
+  color: white;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 60rpx;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 32rpx;
+  max-width: 94%;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 300rpx;
+  grid-template-rows: 210rpx 210rpx 80rpx;
+  grid-template-areas: "lastEditor" "text" "name";
+  border-radius: 18rpx;
+  background: #f5f6f7; /* grey */
+  box-shadow: 0 2.8rpx 2.2rpx rgba(0, 0, 0, 0.034),
+    0 6.7rpx 5.3rpx rgba(0, 0, 0, 0.048), 0 12.5rpx 10rpx rgba(0, 0, 0, 0.06),
+    0 22.3rpx 17.9rpx rgba(0, 0, 0, 0.072),
+    0 41.8rpx 33.4rpx rgba(0, 0, 0, 0.086), 0 100rpx 80rpx rgba(0, 0, 0, 0.12);
+  font-family: "Noto Sans SC", sans-serif;
+  text-align: center;
+  margin: 40rpx 20rpx;
+}
+
+.card-lastEditor {
+  grid-area: lastEditor;
+  /* background: rgb(255, 7, 110); */
+  background: #f54a45;
+  background-size: cover;
+  border-top-left-radius: 15rpx;
+  border-top-right-radius: 15rpx;
+
+  padding: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+}
+
+.card-lastEditor .avatar image {
+  border-radius: 50%;
+  box-shadow: 0 2.8rpx 2.2rpx rgba(0, 0, 0, 0.034),
+    0 6.7rpx 5.3rpx rgba(0, 0, 0, 0.048), 0 12.5rpx 10rpx rgba(0, 0, 0, 0.06),
+    0 22.3rpx 17.9rpx rgba(0, 0, 0, 0.072),
+    0 41.8rpx 33.4rpx rgba(0, 0, 0, 0.086), 0 100rpx 80rpx rgba(0, 0, 0, 0.12);
+  width: 72rpx;
+  height: 72rpx;
+}
+
+.card-text {
+  grid-area: text;
+  margin: 45rpx;
+}
+
+.card-text .mtime {
+  color: rgb(255, 7, 110);
+  font-size: 13rpx;
+}
+
+.card-text .mtime {
+  color: grey;
+  font-size: 15rpx;
+  font-weight: 300;
+  margin-top: 15rpx;
+}
+
+.card-text .status {
+  margin-top: 0rpx;
+  font-size: 28rpx;
+}
+
+.card-name {
+  grid-area: name;
+  display: grid;
+  border-bottom-left-radius: 15rpx;
+  border-bottom-right-radius: 15rpx;
+  background: #f54a45;
+
+  padding: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+}
+
+.card-name .spotname {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.idel .card-name,
+.idel .card-lastEditor {
+  /* background: rgb(0, 189, 63); */
+  background: #34c724; /* green */
+  /* background: #ffc60a; */ /* yellow */
+  /* background: #3370ff; */ /* blue */
+  /* background: #f5f6f7; */ /* grey */
+  /* background: #f54a45; */ /* red */
+  /* background: #fde2e2; */ /* red light */
+  /* background: #faf1d1; */ /* yellow light */
+  /* background: #d9f5d6; */ /* green light */
+  /* background: #e1eaff; */ /* blue light */
+}

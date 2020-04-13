@@ -9,9 +9,10 @@ const ranges = [rangeSpots, rangeCars];
 
 const app = getApp();
 
-// TODO: share file link and introduce
 // TODO: record car move history
-// TODO: tab for chat of car move history
+// TODO: Mok fake data
+// TODO: tab for chart of car move history
+// TODO: data chart for using rate of paking spots
 // TODO: management tab for adding or delete information of car and spot by admin
 // TODO: make full feishu api
 
