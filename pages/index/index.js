@@ -81,41 +81,30 @@ Page({
   loadSheetMeta: function () {
     var that = this;
 
-    if (!that.hasSheetMeta) {
-      return ttCloudApi
-        .sheetMeta(app.globalData.user_access_token)
-        .then((res) => {
-          var sheetMeta = res.data.data;
+    return ttCloudApi
+      .sheetMeta(app.globalData.user_access_token)
+      .then((res) => {
+        var sheetMeta = res.data.data;
 
-          // make spots and cars sheet range
-          var lastColSpots = util.columnCharName(
-            sheetMeta.sheets[0].columnCount
-          );
-          var lastRowSpots = sheetMeta.sheets[0].rowCount;
-          var lastColCars = util.columnCharName(
-            sheetMeta.sheets[1].columnCount
-          );
-          var lastRowCars = sheetMeta.sheets[1].rowCount;
-          var rangeSpots = `${sheetIdSpots}!A2:${lastColSpots}${lastRowSpots}`;
-          var rangeCars = `${sheetIdCars}!A2:${lastColCars}${lastRowCars}`;
-          var ranges = [rangeSpots, rangeCars];
+        // make spots and cars sheet range
+        var lastColSpots = util.columnCharName(sheetMeta.sheets[0].columnCount);
+        var lastRowSpots = sheetMeta.sheets[0].rowCount;
+        var lastColCars = util.columnCharName(sheetMeta.sheets[1].columnCount);
+        var lastRowCars = sheetMeta.sheets[1].rowCount;
+        var rangeSpots = `${sheetIdSpots}!A2:${lastColSpots}${lastRowSpots}`;
+        var rangeCars = `${sheetIdCars}!A2:${lastColCars}${lastRowCars}`;
+        var ranges = [rangeSpots, rangeCars];
 
-          that.setData({
-            hasSheetMeta: true,
-            sheetMeta: sheetMeta,
-            ranges: ranges,
-          });
-
-          app.globalData.hasSheetMeta = true;
-          app.globalData.sheetMeta = sheetMeta;
-          console.log("Loaded sheetMeta Success");
+        that.setData({
+          hasSheetMeta: true,
+          sheetMeta: sheetMeta,
+          ranges: ranges,
         });
-    } else {
-      var p = new Promise(function (resolve) {
-        resolve(console.log("Already had sheetMeta"));
+
+        app.globalData.hasSheetMeta = true;
+        app.globalData.sheetMeta = sheetMeta;
+        console.log("Loaded sheetMeta Success");
       });
-      return p;
-    }
   },
 
   loadCloudData: function () {
@@ -186,15 +175,25 @@ Page({
 
     spot[5] = dateTime;
   },
-  updateSpotAll: function (spot, status) {
+
+  updateSpotHistory: function (spot, hisIn) {
+    if (hisIn == "push") {
+      spot[6] = this.data.sheetMeta.sheets[2].rowCount;
+    } else if (hisIn == "pop") {
+      spot[6] = "";
+    }
+  },
+
+  updateSpotAll: function (spot, status, hisIn) {
     this.updateSpotStatus(spot, status);
     this.updateSpotUserInfo(spot);
     this.updateSpotDateTime(spot);
+    this.updateSpotHistory(spot, hisIn);
   },
 
-  updateSpots: function (targetIndex, status) {
+  updateSpots: function (targetIndex, status, hisIn) {
     var spots = this.data.spots;
-    this.updateSpotAll(spots[targetIndex], status);
+    this.updateSpotAll(spots[targetIndex], status, hisIn);
 
     this.setData({
       spots: spots,
@@ -224,15 +223,14 @@ Page({
       .ttShowModal(prompt_title, prompt_content)
       .then(({ confirm, cancel }) => {
         if (confirm) {
-          that.updateSpots(targetIndex, "");
-
+          that.updateSpots(targetIndex, "", "pop");
+          that.updateCloudSpots();
           console.log("carOut successed");
         }
         if (cancel) {
           console.log("carOut canceled");
         }
-      })
-      .then(that.updateCloudSpots);
+      });
   },
 
   carIn: function (targetIndex) {
@@ -241,12 +239,39 @@ Page({
     console.log("Here is carIn...");
     console.log(`targetIndex: ${targetIndex}`);
 
-    ttClientApi
-      .ttShowActionSheet(unUsedPlates)
-      .then((res) => {
-        that.updateSpots(targetIndex, unUsedPlates[res.tapIndex]);
-      })
-      .then(that.updateCloudSpots);
+    ttClientApi.ttShowActionSheet(unUsedPlates).then((res) => {
+      // TODO: clean code
+      var plate = unUsedPlates[res.tapIndex];
+      // make history sheet range
+      var sheetMeta = this.data.sheetMeta;
+
+      var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
+      var lastRowHist = sheetMeta.sheets[2].rowCount;
+      var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
+
+      var newHist = [
+        [
+          lastRowHist,
+          that.data.spots[targetIndex][1],
+          plate,
+          util.nowDateTime(),
+        ],
+      ];
+
+      console.log(newHist);
+      console.log(rangeHist);
+
+      ttCloudApi
+        .sheetAppendData(app.globalData.user_access_token, rangeHist, newHist)
+        .then((res) => {
+          if (res.data.code == 0) {
+            console.log("Created a new history item");
+            console.log(res.data);
+            that.updateSpots(targetIndex, plate, "push");
+          }
+        })
+        .then(that.updateCloudSpots);
+    });
   },
 
   carMove: function (e) {
