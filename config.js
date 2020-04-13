@@ -1,4 +1,3 @@
-// const sheetToken = "shtcnTNuG88jU9y2Ldfp9ZgjjUb";
 const sheetToken = "shtcniUwsF4rGBfJTenE7JuNmWg";
 const folderToken = "fldcnQ7Qa7RosZTqvzaHveun0og";
 const rangeSpots = "5a3db1!A2:F3";
