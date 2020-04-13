@@ -20,9 +20,8 @@ console.log("-----------------");
 
 const app = getApp();
 
-// TODO: record car move history
 // TODO: Mok fake data
-// TODO: tab for chart of car move history
+// TODO: clean code
 // TODO: data chart for using rate of paking spots
 // TODO: management tab for adding or delete information of car and spot by admin
 // TODO: make full feishu api
@@ -32,7 +31,7 @@ Page({
     var that = this;
 
     // start loading animate
-    ttClientApi.ttShowLoading("Loading...", true);
+    // ttClientApi.ttShowLoading("Loading...", true);
     if (this.data.hasLogin) {
       console.log("Already login");
 
@@ -40,10 +39,10 @@ Page({
       that.loadCloudData();
     } else {
       ttClientApi.login(app).then(() => {
+        app.globalData.hasLogin = true;
         that.setData({
           hasLogin: true,
         });
-        app.globalData.hasLogin = true;
         console.log("Login Success");
 
         that.loadUserInfo();
@@ -54,9 +53,12 @@ Page({
   data: {
     // spots: [[id, name, status, lastEditor, lastEditorAvatar, mtime],...]
     // cars: [[id, plate],...]
+    // plates: [plate1, plate2, ...]
     // hasLogin
+    // hasUserInfo
     // userInfo
     // hasSheetMeta
+    // sheetMeta
   },
 
   loadUserInfo: function () {
@@ -103,6 +105,7 @@ Page({
 
         app.globalData.hasSheetMeta = true;
         app.globalData.sheetMeta = sheetMeta;
+
         console.log("Loaded sheetMeta Success");
       });
   },
@@ -137,7 +140,7 @@ Page({
         console.log(that.data);
         console.log("-----------------");
         // stop loading animate
-        ttClientApi.ttHideToast();
+        // ttClientApi.ttHideToast();
       });
   },
 
@@ -161,22 +164,22 @@ Page({
       });
   },
 
-  updateSpotUserInfo: function (spot) {
+  _updateSpotUserInfo: function (spot) {
     spot[3] = this.data.userInfo.nickName;
     spot[4] = this.data.userInfo.avatarUrl;
   },
 
-  updateSpotStatus: function (spot, status) {
+  _updateSpotStatus: function (spot, status) {
     spot[2] = status;
   },
 
-  updateSpotDateTime: function (spot) {
+  _updateSpotDateTime: function (spot) {
     var dateTime = util.nowDateTime();
 
     spot[5] = dateTime;
   },
 
-  updateSpotHistory: function (spot, hisIn) {
+  _updateSpotHistory: function (spot, hisIn) {
     if (hisIn == "push") {
       spot[6] = this.data.sheetMeta.sheets[2].rowCount;
     } else if (hisIn == "pop") {
@@ -184,16 +187,16 @@ Page({
     }
   },
 
-  updateSpotAll: function (spot, status, hisIn) {
-    this.updateSpotStatus(spot, status);
-    this.updateSpotUserInfo(spot);
-    this.updateSpotDateTime(spot);
-    this.updateSpotHistory(spot, hisIn);
+  _updateSpotAll: function (spot, status, hisIn) {
+    this._updateSpotStatus(spot, status);
+    this._updateSpotUserInfo(spot);
+    this._updateSpotDateTime(spot);
+    this._updateSpotHistory(spot, hisIn);
   },
 
   updateSpots: function (targetIndex, status, hisIn) {
     var spots = this.data.spots;
-    this.updateSpotAll(spots[targetIndex], status, hisIn);
+    this._updateSpotAll(spots[targetIndex], status, hisIn);
 
     this.setData({
       spots: spots,
@@ -222,10 +225,23 @@ Page({
     ttClientApi
       .ttShowModal(prompt_title, prompt_content)
       .then(({ confirm, cancel }) => {
+        var rangeHistPop = `${sheetIdHistory}!E${spot[6] + 1}:E${spot[6] + 1}`;
+        var popTime = [[util.nowDateTime()]];
         if (confirm) {
-          that.updateSpots(targetIndex, "", "pop");
-          that.updateCloudSpots();
-          console.log("carOut successed");
+          ttCloudApi
+            .sheetWriteRange(
+              app.globalData.user_access_token,
+              rangeHistPop,
+              popTime
+            )
+            .then((res) => {
+              if (res.data.code == 0) {
+                that.updateSpots(targetIndex, "", "pop");
+                that.updateCloudSpots();
+                console.log("carOut successed");
+              }
+              console.log(res.data);
+            });
         }
         if (cancel) {
           console.log("carOut canceled");
@@ -239,8 +255,12 @@ Page({
     console.log("Here is carIn...");
     console.log(`targetIndex: ${targetIndex}`);
 
-    ttClientApi.ttShowActionSheet(unUsedPlates).then((res) => {
+    Promise.all([
+      ttClientApi.ttShowActionSheet(unUsedPlates),
+      that.loadSheetMeta(),
+    ]).then(([res, _]) => {
       // TODO: clean code
+      // TODO: update sheetmeta before create a history
       var plate = unUsedPlates[res.tapIndex];
       // make history sheet range
       var sheetMeta = this.data.sheetMeta;
