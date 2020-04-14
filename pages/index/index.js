@@ -166,8 +166,12 @@ Page({
     spot[2] = status;
   },
 
-  _setSpotDateTime: function (spot) {
-    var dateTime = util.nowDateTime();
+  _setSpotDateTime: function (spot, fake = false) {
+    if (fake) {
+      var dateTime = this.fakeDateTime();
+    } else {
+      var dateTime = util.nowDateTime();
+    }
 
     spot[5] = dateTime;
   },
@@ -180,16 +184,16 @@ Page({
     }
   },
 
-  _setSpotAll: function (spot, status, hisAction) {
+  _setSpotAll: function (spot, status, hisAction, fake = false) {
     this._setSpotStatus(spot, status);
     this._setSpotUserInfo(spot);
-    this._setSpotDateTime(spot);
+    this._setSpotDateTime(spot, fake);
     this._setSpotHistory(spot, hisAction);
   },
 
-  setSpots: function (targetIndex, status, hisAction) {
+  setSpots: function (targetIndex, status, hisAction, fake = false) {
     var spots = this.data.spots;
-    this._setSpotAll(spots[targetIndex], status, hisAction);
+    this._setSpotAll(spots[targetIndex], status, hisAction, fake);
 
     this.setData({
       spots: spots,
@@ -221,7 +225,7 @@ Page({
     return d;
   },
 
-  carOut: function (targetIndex) {
+  carOut: function (targetIndex, fake = false) {
     var that = this;
     var spots = that.data.spots;
     var spot = spots[targetIndex];
@@ -277,38 +281,51 @@ Page({
     return d;
   },
 
-  carIn: function (targetIndex) {
+  randomPlateIndex: function (unUsedPlates) {
+    var p = new Promise((resolve) => {
+      return resolve(Math.floor(Math.random() * unUsedPlates.length));
+    });
+
+    return p;
+  },
+
+  carIn: function (targetIndex, fake = false) {
     var that = this;
     var unUsedPlates = this.unUsedPlates();
     console.log("Here is carIn...");
     console.log(`targetIndex: ${targetIndex}`);
 
-    Promise.all([
-      ttClientApi.ttShowActionSheet(unUsedPlates),
-      that.loadSheetMeta(),
-    ]).then(([res, _]) => {
-      var plate = unUsedPlates[res.tapIndex];
-      var pushHisParams = that.makePushHistoryParams(
-        targetIndex,
-        that.data.sheetMeta,
-        plate
-      );
+    if (fake) {
+      var selectPlate = this.randomPlate;
+    } else {
+      var selectPlate = ttClientApi.ttShowActionSheet;
+    }
 
-      ttCloudApi
-        .sheetAppendData(
-          app.globalData.user_access_token,
-          pushHisParams.rangeHist,
-          pushHisParams.valuesHist
-        )
-        .then((res) => {
-          if (res.data.code == 0) {
-            console.log("Created a new history item");
-            console.log(res.data);
-            that.setSpots(targetIndex, plate, "push");
-          }
-        })
-        .then(that.updateCloudSpots);
-    });
+    Promise.all([selectPlate(unUsedPlates), that.loadSheetMeta()]).then(
+      ([res, _]) => {
+        var plate = unUsedPlates[res.tapIndex];
+        var pushHisParams = that.makePushHistoryParams(
+          targetIndex,
+          that.data.sheetMeta,
+          plate
+        );
+
+        ttCloudApi
+          .sheetAppendData(
+            app.globalData.user_access_token,
+            pushHisParams.rangeHist,
+            pushHisParams.valuesHist
+          )
+          .then((res) => {
+            if (res.data.code == 0) {
+              console.log("Created a new history item");
+              console.log(res.data);
+              that.setSpots(targetIndex, plate, "push", fake);
+            }
+          })
+          .then(that.updateCloudSpots);
+      }
+    );
   },
 
   carMove: function (e) {
