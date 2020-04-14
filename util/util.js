@@ -57,9 +57,17 @@ function columnCharName(n) {
   return String.fromCharCode(64 + n);
 }
 
+function logger(message, data = {}) {
+  console.log("-----------------");
+  console.log(`${message}`);
+  console.log(data);
+  console.log("-----------------");
+}
+
 module.exports = {
   formatTime: formatTime,
   formatLocation: formatLocation,
   nowDateTime: nowDateTime,
   columnCharName: columnCharName,
+  logger: logger,
 };

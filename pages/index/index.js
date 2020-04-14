@@ -21,7 +21,6 @@ console.log("-----------------");
 const app = getApp();
 
 // TODO: Mok fake data
-// TODO: clean code
 // TODO: data chart for using rate of paking spots
 // TODO: management tab for adding or delete information of car and spot by admin
 // TODO: make full feishu api
@@ -33,7 +32,7 @@ Page({
     // start loading animate
     // ttClientApi.ttShowLoading("Loading...", true);
     if (this.data.hasLogin) {
-      console.log("Already login");
+      util.logger("Already login");
 
       that.loadUserInfo();
       that.loadCloudData();
@@ -43,7 +42,7 @@ Page({
         that.setData({
           hasLogin: true,
         });
-        console.log("Login Success");
+        util.logger("Login Success");
 
         that.loadUserInfo();
         that.loadCloudData();
@@ -65,7 +64,7 @@ Page({
     var that = this;
 
     if (this.data.hasUserInfo) {
-      console.log("Already loaded userInfo");
+      util.logger("Already loaded userInfo");
     } else {
       // get userInfo
       ttClientApi.ttGetUserInfo().then((res) => {
@@ -75,7 +74,7 @@ Page({
         });
         app.globalData.hasUserInfo = true;
         app.globalData.userInfo = res.userInfo;
-        console.log("Loaded userInfo Success");
+        util.logger("Loaded userInfo Success");
       });
     }
   },
@@ -106,7 +105,7 @@ Page({
         app.globalData.hasSheetMeta = true;
         app.globalData.sheetMeta = sheetMeta;
 
-        console.log("Loaded sheetMeta Success");
+        util.logger("Loaded sheetMeta Success");
       });
   },
 
@@ -135,10 +134,7 @@ Page({
           cars: res.data.data.valueRanges[1].values,
           plates: plates,
         });
-        console.log("-----------------");
-        console.log("Loaded data from cloud:");
-        console.log(that.data);
-        console.log("-----------------");
+        util.logger("Loaded data from cloud", that.data);
         // stop loading animate
         // ttClientApi.ttHideToast();
       });
@@ -155,48 +151,45 @@ Page({
         that.data.spots
       )
       .then(() => {
-        console.log("-----------------");
-        console.log("Update spots success:");
-        console.log(that.data.spots);
-        console.log("-----------------");
+        util.logger("Update spots success", that.data.spots);
         // reload page after update spots
         that.onLoad();
       });
   },
 
-  _updateSpotUserInfo: function (spot) {
+  _setSpotUserInfo: function (spot) {
     spot[3] = this.data.userInfo.nickName;
     spot[4] = this.data.userInfo.avatarUrl;
   },
 
-  _updateSpotStatus: function (spot, status) {
+  _setSpotStatus: function (spot, status) {
     spot[2] = status;
   },
 
-  _updateSpotDateTime: function (spot) {
+  _setSpotDateTime: function (spot) {
     var dateTime = util.nowDateTime();
 
     spot[5] = dateTime;
   },
 
-  _updateSpotHistory: function (spot, hisIn) {
-    if (hisIn == "push") {
+  _setSpotHistory: function (spot, hisAction) {
+    if (hisAction == "push") {
       spot[6] = this.data.sheetMeta.sheets[2].rowCount;
-    } else if (hisIn == "pop") {
+    } else if (hisAction == "pop") {
       spot[6] = "";
     }
   },
 
-  _updateSpotAll: function (spot, status, hisIn) {
-    this._updateSpotStatus(spot, status);
-    this._updateSpotUserInfo(spot);
-    this._updateSpotDateTime(spot);
-    this._updateSpotHistory(spot, hisIn);
+  _setSpotAll: function (spot, status, hisAction) {
+    this._setSpotStatus(spot, status);
+    this._setSpotUserInfo(spot);
+    this._setSpotDateTime(spot);
+    this._setSpotHistory(spot, hisAction);
   },
 
-  updateSpots: function (targetIndex, status, hisIn) {
+  setSpots: function (targetIndex, status, hisAction) {
     var spots = this.data.spots;
-    this._updateSpotAll(spots[targetIndex], status, hisIn);
+    this._setSpotAll(spots[targetIndex], status, hisAction);
 
     this.setData({
       spots: spots,
@@ -213,6 +206,21 @@ Page({
     });
   },
 
+  makePopHistoryParams: function (targetIndex, sheetMeta) {
+    var spot = this.data.spots[targetIndex];
+    var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
+    var targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
+
+    var rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
+    var popTime = util.nowDateTime();
+    var valuesHist = [[popTime]];
+
+    var d = { rangeHist: rangeHist, valuesHist: valuesHist };
+    util.logger("Pop history params", d);
+
+    return d;
+  },
+
   carOut: function (targetIndex) {
     var that = this;
     var spots = that.data.spots;
@@ -225,47 +233,48 @@ Page({
     ttClientApi
       .ttShowModal(prompt_title, prompt_content)
       .then(({ confirm, cancel }) => {
-        var rangeHistPop = `${sheetIdHistory}!E${spot[6] + 1}:E${spot[6] + 1}`;
-        var popTime = [[util.nowDateTime()]];
+        var popHisParams = that.makePopHistoryParams(
+          targetIndex,
+          that.data.sheetMeta
+        );
+
         if (confirm) {
           ttCloudApi
             .sheetWriteRange(
               app.globalData.user_access_token,
-              rangeHistPop,
-              popTime
+              popHisParams.rangeHist,
+              popHisParams.valuesHist
             )
             .then((res) => {
               if (res.data.code == 0) {
-                that.updateSpots(targetIndex, "", "pop");
+                that.setSpots(targetIndex, "", "pop");
                 that.updateCloudSpots();
-                console.log("carOut successed");
+                util.logger("carOut successed");
               }
               console.log(res.data);
             });
         }
         if (cancel) {
-          console.log("carOut canceled");
+          util.logger("carOut canceled");
         }
       });
   },
 
-  makeNewHistoryParams: function (targetIndex, sheetMeta, plate) {
+  makePushHistoryParams: function (targetIndex, sheetMeta, plate) {
     // make history sheet range
     var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
     var lastRowHist = sheetMeta.sheets[2].rowCount;
     var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
+    var pushTime = util.nowDateTime();
 
     var valuesHist = [
-      [lastRowHist, this.data.spots[targetIndex][1], plate, util.nowDateTime()],
+      [lastRowHist, this.data.spots[targetIndex][1], plate, pushTime],
     ];
 
-    console.log(rangeHist);
-    console.log(valuesHist);
+    var d = { rangeHist: rangeHist, valuesHist: valuesHist };
+    util.logger("Push history params", d);
 
-    return {
-      rangeHist: rangeHist,
-      valuesHist: valuesHist,
-    };
+    return d;
   },
 
   carIn: function (targetIndex) {
@@ -279,7 +288,7 @@ Page({
       that.loadSheetMeta(),
     ]).then(([res, _]) => {
       var plate = unUsedPlates[res.tapIndex];
-      var newHisParams = that.makeNewHistoryParams(
+      var pushHisParams = that.makePushHistoryParams(
         targetIndex,
         that.data.sheetMeta,
         plate
@@ -288,14 +297,14 @@ Page({
       ttCloudApi
         .sheetAppendData(
           app.globalData.user_access_token,
-          newHisParams.rangeHist,
-          newHisParams.valuesHist
+          pushHisParams.rangeHist,
+          pushHisParams.valuesHist
         )
         .then((res) => {
           if (res.data.code == 0) {
             console.log("Created a new history item");
             console.log(res.data);
-            that.updateSpots(targetIndex, plate, "push");
+            that.setSpots(targetIndex, plate, "push");
           }
         })
         .then(that.updateCloudSpots);
