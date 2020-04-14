@@ -249,6 +249,25 @@ Page({
       });
   },
 
+  makeNewHistoryParams: function (targetIndex, sheetMeta, plate) {
+    // make history sheet range
+    var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
+    var lastRowHist = sheetMeta.sheets[2].rowCount;
+    var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
+
+    var valuesHist = [
+      [lastRowHist, this.data.spots[targetIndex][1], plate, util.nowDateTime()],
+    ];
+
+    console.log(rangeHist);
+    console.log(valuesHist);
+
+    return {
+      rangeHist: rangeHist,
+      valuesHist: valuesHist,
+    };
+  },
+
   carIn: function (targetIndex) {
     var that = this;
     var unUsedPlates = this.unUsedPlates();
@@ -259,30 +278,19 @@ Page({
       ttClientApi.ttShowActionSheet(unUsedPlates),
       that.loadSheetMeta(),
     ]).then(([res, _]) => {
-      // TODO: clean code
-      // TODO: update sheetmeta before create a history
       var plate = unUsedPlates[res.tapIndex];
-      // make history sheet range
-      var sheetMeta = this.data.sheetMeta;
-
-      var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
-      var lastRowHist = sheetMeta.sheets[2].rowCount;
-      var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
-
-      var newHist = [
-        [
-          lastRowHist,
-          that.data.spots[targetIndex][1],
-          plate,
-          util.nowDateTime(),
-        ],
-      ];
-
-      console.log(newHist);
-      console.log(rangeHist);
+      var newHisParams = that.makeNewHistoryParams(
+        targetIndex,
+        that.data.sheetMeta,
+        plate
+      );
 
       ttCloudApi
-        .sheetAppendData(app.globalData.user_access_token, rangeHist, newHist)
+        .sheetAppendData(
+          app.globalData.user_access_token,
+          newHisParams.rangeHist,
+          newHisParams.valuesHist
+        )
         .then((res) => {
           if (res.data.code == 0) {
             console.log("Created a new history item");
@@ -305,5 +313,42 @@ Page({
     } else {
       that.carIn(targetIndex);
     }
+  },
+
+  fake: {
+    costTime: 1 * 60,
+    counter: 0,
+    timer: 0,
+  },
+
+  fakeData: function () {
+    var that = this;
+
+    var random = Math.random() * 0.5;
+    that.fake.timer += random;
+    if (that.fake.timer <= that.fake.costTime) {
+      console.log(
+        `The ${Math.ceil(++that.fake.counter / 2)}th fake, timer is ${
+          that.fake.timer
+        } now`
+      );
+      if (that.fake.counter % 2 == 1) {
+        console.log("Fake carIn");
+      } else {
+        console.log("Fake carOut");
+      }
+
+      setTimeout(that.fakeData, random * 1000);
+    }
+  },
+
+  fakeCarIn: function (e) {
+    console.log("------------------");
+    console.log("Start fake CarIn...");
+  },
+
+  fakeCarOut: function (e) {
+    console.log("------------------");
+    console.log("Start fake CarIn...");
   },
 });

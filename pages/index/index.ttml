@@ -7,3 +7,5 @@
         <template is="spotCard" data="{{item}}"/>
     </block>
 </view>
+
+<button type="primary" bindtap="fakeData">FakeData</button>
