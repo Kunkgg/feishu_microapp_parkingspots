@@ -14,8 +14,6 @@ var rangeTest = `${sheetIdTest}!A2:E3`;
 
 const app = getApp();
 
-// TODO: record car move history
-// TODO: Mok fake data
 // TODO: tab for chart of car move history
 // TODO: data chart for using rate of paking spots
 // TODO: management tab for adding or delete information of car and spot by admin

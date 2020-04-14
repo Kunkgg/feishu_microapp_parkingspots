@@ -26,6 +26,7 @@ body {
   justify-content: space-between;
   font-size: 32rpx;
   max-width: 94%;
+  flex-wrap: wrap;
 }
 
 .card {
@@ -124,4 +125,9 @@ body {
   /* background: #faf1d1; */ /* yellow light */
   /* background: #d9f5d6; */ /* green light */
   /* background: #e1eaff; */ /* blue light */
+}
+
+button {
+  margin-top: 30rpx;
+  margin-bottom: 30rpx;
 }

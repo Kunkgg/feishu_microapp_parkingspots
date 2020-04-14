@@ -32,7 +32,7 @@ function formatLocation(longitude, latitude) {
   };
 }
 
-function nowDateTime() {
+function dateTimeString(dt = "") {
   //return: current time format 'yyyy/MM/dd HH:mm:ss'
   //e.g. 2017/08/10 23:24:25
   function twoDigit(n) {
@@ -42,10 +42,11 @@ function nowDateTime() {
     return n;
   }
 
-  var now = new Date();
-  var date =
-    now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate();
-  var time = [now.getHours(), now.getMinutes(), now.getSeconds()]
+  if (!dt) {
+    dt = new Date();
+  }
+  var date = dt.getFullYear() + "/" + (dt.getMonth() + 1) + "/" + dt.getDate();
+  var time = [dt.getHours(), dt.getMinutes(), dt.getSeconds()]
     .map(twoDigit)
     .join(":");
   var dateTime = date + " " + time;
@@ -67,7 +68,7 @@ function logger(message, data = {}) {
 module.exports = {
   formatTime: formatTime,
   formatLocation: formatLocation,
-  nowDateTime: nowDateTime,
+  dateTimeString: dateTimeString,
   columnCharName: columnCharName,
   logger: logger,
 };

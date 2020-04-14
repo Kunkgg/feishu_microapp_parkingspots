@@ -1,6 +1,8 @@
 <import src="spotCard.ttml"/>
 
-<view class="header">建衡技术车位信息共享</view>
+<view class="contain">
+    <view class="header">{{title}}</view>
+</view>
 
 <view class="container">
     <block tt:for="{{spots}}">
@@ -8,4 +10,8 @@
     </block>
 </view>
 
-<button type="primary" bindtap="fakeData">FakeData</button>
+<view tt:if="{{fakeMode == true}}" class="contain" style="flex-direction: row;">
+    <button type="primary" bindtap="fakeData">FakeData</button>
+    <button type="primary" bindtap="fakeCarIn">FakeCarIn</button>
+    <button type="primary" bindtap="fakeCarOut">FakeCarOut</button>
+</view>

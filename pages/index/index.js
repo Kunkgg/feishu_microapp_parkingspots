@@ -58,6 +58,8 @@ Page({
     // userInfo
     // hasSheetMeta
     // sheetMeta
+    fakeMode: config.fakeMode,
+    title: "建衡技术车位信息共享",
   },
 
   loadUserInfo: function () {
@@ -170,7 +172,7 @@ Page({
     if (fake) {
       var dateTime = this.fakeDateTime();
     } else {
-      var dateTime = util.nowDateTime();
+      var dateTime = util.dateTimeString();
     }
 
     spot[5] = dateTime;
@@ -210,19 +212,31 @@ Page({
     });
   },
 
-  makePopHistoryParams: function (targetIndex, sheetMeta) {
+  makePopHistoryParams: function (targetIndex, sheetMeta, fake = false) {
     var spot = this.data.spots[targetIndex];
     var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
     var targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
 
     var rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
-    var popTime = util.nowDateTime();
+    if (fake) {
+      var popTime = this.fakeDateTime();
+    } else {
+      var popTime = util.dateTimeString();
+    }
     var valuesHist = [[popTime]];
 
     var d = { rangeHist: rangeHist, valuesHist: valuesHist };
     util.logger("Pop history params", d);
 
     return d;
+  },
+
+  autoConfirm: function () {
+    var p = new Promise((resolve) => {
+      return resolve({ confirm: true, cancel: false });
+    });
+
+    return p;
   },
 
   carOut: function (targetIndex, fake = false) {
@@ -234,42 +248,57 @@ Page({
     console.log("Here is carOut...");
     console.log(`targetIndex: ${targetIndex}`);
 
-    ttClientApi
-      .ttShowModal(prompt_title, prompt_content)
-      .then(({ confirm, cancel }) => {
-        var popHisParams = that.makePopHistoryParams(
-          targetIndex,
-          that.data.sheetMeta
-        );
+    if (fake) {
+      var selectConfirm = this.autoConfirm;
+    } else {
+      var selectConfirm = ttClientApi.ttShowModal;
+    }
 
-        if (confirm) {
-          ttCloudApi
-            .sheetWriteRange(
-              app.globalData.user_access_token,
-              popHisParams.rangeHist,
-              popHisParams.valuesHist
-            )
-            .then((res) => {
-              if (res.data.code == 0) {
-                that.setSpots(targetIndex, "", "pop");
-                that.updateCloudSpots();
-                util.logger("carOut successed");
-              }
-              console.log(res.data);
-            });
-        }
-        if (cancel) {
-          util.logger("carOut canceled");
-        }
-      });
+    selectConfirm(prompt_title, prompt_content).then(({ confirm, cancel }) => {
+      var popHisParams = that.makePopHistoryParams(
+        targetIndex,
+        that.data.sheetMeta,
+        fake
+      );
+
+      if (confirm) {
+        ttCloudApi
+          .sheetWriteRange(
+            app.globalData.user_access_token,
+            popHisParams.rangeHist,
+            popHisParams.valuesHist
+          )
+          .then((res) => {
+            if (res.data.code == 0) {
+              that.setSpots(targetIndex, "", "pop", fake);
+              that.updateCloudSpots();
+              util.logger("carOut successed");
+            }
+            console.log(res.data);
+          });
+      }
+      if (cancel) {
+        util.logger("carOut canceled");
+      }
+    });
   },
 
-  makePushHistoryParams: function (targetIndex, sheetMeta, plate) {
+  makePushHistoryParams: function (
+    targetIndex,
+    sheetMeta,
+    plate,
+    fake = false
+  ) {
     // make history sheet range
     var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
     var lastRowHist = sheetMeta.sheets[2].rowCount;
     var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
-    var pushTime = util.nowDateTime();
+
+    if (fake) {
+      var pushTime = this.fakeDateTime();
+    } else {
+      var pushTime = util.dateTimeString();
+    }
 
     var valuesHist = [
       [lastRowHist, this.data.spots[targetIndex][1], plate, pushTime],
@@ -283,7 +312,9 @@ Page({
 
   randomPlateIndex: function (unUsedPlates) {
     var p = new Promise((resolve) => {
-      return resolve(Math.floor(Math.random() * unUsedPlates.length));
+      return resolve({
+        tapIndex: Math.floor(Math.random() * unUsedPlates.length),
+      });
     });
 
     return p;
@@ -296,7 +327,7 @@ Page({
     console.log(`targetIndex: ${targetIndex}`);
 
     if (fake) {
-      var selectPlate = this.randomPlate;
+      var selectPlate = that.randomPlateIndex;
     } else {
       var selectPlate = ttClientApi.ttShowActionSheet;
     }
@@ -307,7 +338,8 @@ Page({
         var pushHisParams = that.makePushHistoryParams(
           targetIndex,
           that.data.sheetMeta,
-          plate
+          plate,
+          fake
         );
 
         ttCloudApi
@@ -342,15 +374,17 @@ Page({
   },
 
   fake: {
-    costTime: 1 * 60,
+    costTime: 5 * 60,
     counter: 0,
     timer: 0,
+    step: 0.7,
+    delay: 1.2,
   },
 
   fakeData: function () {
     var that = this;
 
-    var random = Math.random() * 0.5;
+    var random = Math.random() * that.fake.step;
     that.fake.timer += random;
     if (that.fake.timer <= that.fake.costTime) {
       console.log(
@@ -358,23 +392,41 @@ Page({
           that.fake.timer
         } now`
       );
+
       if (that.fake.counter % 2 == 1) {
         console.log("Fake carIn");
+        this.carIn(1, true);
       } else {
         console.log("Fake carOut");
+        this.carOut(1, true);
       }
 
-      setTimeout(that.fakeData, random * 1000);
+      setTimeout(that.fakeData, (that.fake.delay + random) * 1000);
     }
   },
 
-  fakeCarIn: function (e) {
+  fakeDateTime: function () {
+    var now = new Date();
+    var yearAgo = new Date();
+    var yearAgo = yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+
+    var dt = new Date(
+      ((now - yearAgo) * this.fake.timer) / this.fake.costTime + yearAgo
+    );
+
+    var dt = util.dateTimeString(dt);
+    console.log(`fake dateTime: ${dt}`);
+    return dt;
+  },
+  fakeCarIn: function () {
     console.log("------------------");
     console.log("Start fake CarIn...");
+    this.carIn(0, true);
   },
 
-  fakeCarOut: function (e) {
+  fakeCarOut: function () {
     console.log("------------------");
-    console.log("Start fake CarIn...");
+    console.log("Start fake CarOut...");
+    this.carOut(0, true);
   },
 });
