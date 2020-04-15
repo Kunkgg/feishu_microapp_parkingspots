@@ -35,6 +35,7 @@ function formatLocation(longitude, latitude) {
 function dateTimeString(dt = "") {
   //return: current time format 'yyyy/MM/dd HH:mm:ss'
   //e.g. 2017/08/10 23:24:25
+  //e.g. 2017/08/12 03:04:25
   function twoDigit(n) {
     n = n.toString();
     return n[1] ? n : "0" + n;
@@ -43,7 +44,12 @@ function dateTimeString(dt = "") {
   if (!dt) {
     dt = new Date();
   }
-  var date = dt.getFullYear() + "/" + (dt.getMonth() + 1) + "/" + dt.getDate();
+  var date =
+    dt.getFullYear() +
+    "/" +
+    twoDigit(dt.getMonth() + 1) +
+    "/" +
+    twoDigit(dt.getDate());
   var time = [dt.getHours(), dt.getMinutes(), dt.getSeconds()]
     .map(twoDigit)
     .join(":");
