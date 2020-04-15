@@ -43,6 +43,7 @@ Page({
   data: {
     // history: array
     // title:   string
+    // usageRate: object
     title: "建衡技术车位信息统计",
     spotnames: ["D-100", "D-101"],
     plates: ["陕AF19967", "陕A5P0J7", "京MC7816"],
@@ -156,17 +157,108 @@ Page({
   },
 
   statistics: function () {
-    this.usageRateLastDay();
-    this.usageRateLastWeek();
-    this.usageRateLastMonth();
-    this.usageRateLastYear();
-    this.usageRateLast12Month();
+    var usageRate = {};
+
+    this.usageRateLastDay(usageRate);
+    this.usageRateLastWeek(usageRate);
+    this.usageRateLastMonth(usageRate);
+    this.usageRateLastYear(usageRate);
+    this.usageRateLast12Month(usageRate);
+
+    this.setData({
+      usageRate: usageRate,
+    });
   },
 
-  usageRateLastDay: function () {
+  usageRateLastDay: function (usageRate) {
     var rangeStart = 1;
     var rangeEnd = 1;
-    var ur = this.usageRate([1, 1], this.data.spotnames, this.data.plates);
+    var timeRange = [rangeStart, rangeEnd];
+    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
     util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    usageRate["lastDay"] = ur;
+  },
+  usageRateLastWeek: function (usageRate) {
+    var rangeStart = 1;
+    var rangeEnd = 7;
+    var timeRange = [rangeStart, rangeEnd];
+    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
+    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    usageRate["lastWeek"] = ur;
+  },
+  usageRateLastMonth: function (usageRate) {
+    var rangeStart = 1;
+    var rangeEnd = 30;
+    var timeRange = [rangeStart, rangeEnd];
+    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
+    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    usageRate["lastMonth"] = ur;
+  },
+  usageRateLastYear: function (usageRate) {
+    var rangeStart = 1;
+    var rangeEnd = 365;
+    var timeRange = [rangeStart, rangeEnd];
+    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
+    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    usageRate["lastYear"] = ur;
+  },
+
+  usageRateLast12Month: function (usageRate) {
+    var monthRanges = [];
+    var last12Month = [];
+
+    for (var i = 0; i < 12; i++) {
+      var now = new Date();
+      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      today = today.getTime();
+      var targetMonthDistance = i + 1;
+      // notice Date().getMonth() start from 0
+      // realmonth = Date().getMonth() + 1
+
+      if (now.getMonth() < targetMonthDistance) {
+        var y = now.getFullYear() - 1;
+        var m = now.getMonth() - targetMonthDistance + 12;
+        var mEnd = m + 1;
+        var yEnd = y;
+        if (mEnd > 11) {
+          mEnd = 0;
+          yEnd = y + 1;
+        }
+      } else {
+        var y = now.getFullYear();
+        var m = now.getMonth() - targetMonthDistance;
+        var yEnd = y + 1;
+        var mEnd = m + 1;
+      }
+      var targetMonthStart = new Date(y, m);
+      targetMonthStart = targetMonthStart.getTime();
+      var targetMonthEnd = new Date(yEnd, mEnd);
+      targetMonthEnd = targetMonthEnd.getTime() - 1000;
+
+      var rangeStart = Math.floor(
+        (today - targetMonthEnd) / (3600 * 24 * 1000)
+      );
+      var rangeEnd = Math.floor(
+        (today - targetMonthStart) / (3600 * 24 * 1000)
+      );
+
+      var range = [rangeStart, rangeEnd];
+      monthRanges.push(range);
+      // console.log(`range last ${i + 1} month`);
+      // console.log(range);
+      // var s = new Date(targetMonthStart);
+      // var e = new Date(targetMonthEnd);
+      // console.log(util.dateTimeString(s));
+      // console.log(util.dateTimeString(e));
+    }
+
+    for (var i = 0; i < monthRanges.length; i++) {
+      var timeRange = monthRanges[i];
+      var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
+      last12Month.push(ur);
+      util.logger(`last ${i + 1} month`, ur);
+    }
+
+    usageRate[last12Month] = last12Month;
   },
 });
