@@ -20,41 +20,74 @@ const app = getApp();
 Page({
   onLoad: function () {
     var that = this;
-    var token = app.globalData.user_access_token;
 
-    if (app.globalData.hasLogin) {
-      // var values = [
-      //   [300, "", "", "time", "time"],
-      //   [301, "p1", "c2", "time", "time"],
-      // ];
-      // ttCloudApi.sheetAppendData(token, rangeTest, values).then((res) => {
-      //   console.log(res.data);
-      //   var str = JSON.stringify(res.data, undefined, 4);
-      //   console.log(str);
-      // });
-      // ttCloudApi
-      //   .sheetDelLines(token, sheetIdTest, 15, 18)
-      //   .then((res) => {
-      //     console.log(res.data);
-      //     var str = JSON.stringify(res.data, undefined, 4);
-      //     console.log(str);
-      //   })
-      //   .then(() => {
-      //     return ttCloudApi.sheetMeta(token);
-      //   })
-      //   .then((res) => {
-      //     console.log(res.data);
-      //     var str = JSON.stringify(res.data, undefined, 4);
-      //     console.log(str);
-      //     that.setData({
-      //       sheetMeta: res.data.data.sheets,
-      //     });
-      //   });
+    // start loading animate
+    // ttClientApi.ttShowLoading("Loading...", true);
+    if (this.data.hasLogin) {
+      util.logger("Already login");
 
-      console.log(app);
+      that.loadHistoryData();
+    } else {
+      ttClientApi.login(app).then(() => {
+        app.globalData.hasLogin = true;
+        that.setData({
+          hasLogin: true,
+        });
+        util.logger("Login Success");
+
+        that.loadHistoryData();
+      });
     }
   },
+
   data: {
     title: "建衡技术车位信息统计",
+  },
+
+  loadSheetMeta: function () {
+    var that = this;
+
+    return ttCloudApi
+      .sheetMeta(app.globalData.user_access_token)
+      .then((res) => {
+        var sheetMeta = res.data.data;
+
+        // make spots and cars sheet range
+        var lastColSpots = util.columnCharName(sheetMeta.sheets[2].columnCount);
+        var lastRowSpots = sheetMeta.sheets[2].rowCount;
+        var rangeHist = `${sheetIdHistory}!A2:${lastColSpots}${lastRowSpots}`;
+
+        that.setData({
+          range: rangeHist,
+        });
+
+        app.globalData.hasSheetMeta = true;
+        app.globalData.sheetMeta = sheetMeta;
+
+        util.logger("Loaded sheetMeta Success");
+      });
+  },
+
+  loadHistoryData: function () {
+    var that = this;
+
+    // get sheetMeta for making data ranges
+    that
+      .loadSheetMeta()
+      .then(() => {
+        // load data from cloud
+        return ttCloudApi.sheetReadRange(
+          app.globalData.user_access_token,
+          that.data.range
+        );
+      })
+      .then((res) => {
+        that.setData({
+          history: res.data.data.valueRange.values,
+        });
+        util.logger("Loaded history from cloud", that.data);
+        // stop loading animate
+        // ttClientApi.ttHideToast();
+      });
   },
 });

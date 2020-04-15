@@ -1,4 +1,5 @@
 
 <view class="header">{{title}}</view>
-<view class="header">{{sheetMeta[3].title}} sheet</view>
-<view class="header">row: {{sheetMeta[3].rowCount}}, col: {{sheetMeta[3].columnCount}}</view>
+/* <view class="header">{{sheetMeta[3].title}} sheet</view> */
+/* <view class="header">row: {{sheetMeta[3].rowCount}}, col: {{sheetMeta[3].columnCount}}</view> */
+<text tt:for="{{history}}">{{item[0]}} {{item[1]}} {{item[2]}} {{item[3]}} {{item[4]}}</text>
