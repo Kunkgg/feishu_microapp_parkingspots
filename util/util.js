@@ -36,10 +36,8 @@ function dateTimeString(dt = "") {
   //return: current time format 'yyyy/MM/dd HH:mm:ss'
   //e.g. 2017/08/10 23:24:25
   function twoDigit(n) {
-    if (n.toString().length == 1) {
-      n = "0" + n;
-    }
-    return n;
+    n = n.toString();
+    return n[1] ? n : "0" + n;
   }
 
   if (!dt) {
@@ -54,8 +52,31 @@ function dateTimeString(dt = "") {
   return dateTime;
 }
 
+function dateString(dt = "") {
+  if (!dt) {
+    dt = new Date();
+  }
+  var date = dt.getFullYear() + "/" + (dt.getMonth() + 1) + "/" + dt.getDate();
+
+  return date;
+}
+
 function columnCharName(n) {
+  // transform 1 -> 'A', 2 -> 'B'
   return String.fromCharCode(64 + n);
+}
+
+function sum(input) {
+  if (toString.call(input) !== "[object Array]") return false;
+
+  var total = 0;
+  for (var i = 0; i < input.length; i++) {
+    if (isNaN(input[i])) {
+      continue;
+    }
+    total += Number(input[i]);
+  }
+  return total;
 }
 
 function logger(message, data = {}) {
@@ -69,6 +90,8 @@ module.exports = {
   formatTime: formatTime,
   formatLocation: formatLocation,
   dateTimeString: dateTimeString,
+  dateString: dateString,
   columnCharName: columnCharName,
   logger: logger,
+  sum: sum,
 };

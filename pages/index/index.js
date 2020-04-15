@@ -53,6 +53,8 @@ Page({
     // spots: [[id, name, status, lastEditor, lastEditorAvatar, mtime],...]
     // cars: [[id, plate],...]
     // plates: [plate1, plate2, ...]
+    // fakeMode:    bool
+    // title:       string
     fakeMode: config.fakeMode,
     title: "建衡技术车位信息共享",
   },
