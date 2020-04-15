@@ -53,27 +53,16 @@ Page({
     // spots: [[id, name, status, lastEditor, lastEditorAvatar, mtime],...]
     // cars: [[id, plate],...]
     // plates: [plate1, plate2, ...]
-    // hasLogin
-    // hasUserInfo
-    // userInfo
-    // hasSheetMeta
-    // sheetMeta
     fakeMode: config.fakeMode,
     title: "建衡技术车位信息共享",
   },
 
   loadUserInfo: function () {
-    var that = this;
-
-    if (this.data.hasUserInfo) {
+    if (app.globalData.hasUserInfo) {
       util.logger("Already loaded userInfo");
     } else {
       // get userInfo
       ttClientApi.ttGetUserInfo().then((res) => {
-        that.setData({
-          hasUserInfo: true,
-          userInfo: res.userInfo,
-        });
         app.globalData.hasUserInfo = true;
         app.globalData.userInfo = res.userInfo;
         util.logger("Loaded userInfo Success");
@@ -99,8 +88,6 @@ Page({
         var ranges = [rangeSpots, rangeCars];
 
         that.setData({
-          hasSheetMeta: true,
-          sheetMeta: sheetMeta,
           ranges: ranges,
         });
 
@@ -160,8 +147,8 @@ Page({
   },
 
   _setSpotUserInfo: function (spot) {
-    spot[3] = this.data.userInfo.nickName;
-    spot[4] = this.data.userInfo.avatarUrl;
+    spot[3] = app.globalData.userInfo.nickName;
+    spot[4] = app.globalData.userInfo.avatarUrl;
   },
 
   _setSpotStatus: function (spot, status) {
@@ -180,7 +167,7 @@ Page({
 
   _setSpotHistory: function (spot, hisAction) {
     if (hisAction == "push") {
-      spot[6] = this.data.sheetMeta.sheets[2].rowCount;
+      spot[6] = app.globalData.sheetMeta.sheets[2].rowCount;
     } else if (hisAction == "pop") {
       spot[6] = "";
     }
@@ -257,7 +244,7 @@ Page({
     selectConfirm(prompt_title, prompt_content).then(({ confirm, cancel }) => {
       var popHisParams = that.makePopHistoryParams(
         targetIndex,
-        that.data.sheetMeta,
+        app.globalData.sheetMeta,
         fake
       );
 
@@ -337,7 +324,7 @@ Page({
         var plate = unUsedPlates[res.tapIndex];
         var pushHisParams = that.makePushHistoryParams(
           targetIndex,
-          that.data.sheetMeta,
+          app.globalData.sheetMeta,
           plate,
           fake
         );
@@ -418,6 +405,7 @@ Page({
     console.log(`fake dateTime: ${dt}`);
     return dt;
   },
+
   fakeCarIn: function () {
     console.log("------------------");
     console.log("Start fake CarIn...");

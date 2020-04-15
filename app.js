@@ -12,7 +12,13 @@ App({
     console.log("App Hide");
   },
   globalData: {
+    // hasLogin
+    // hasUserInfo
+    // userInfo
+    // hasSheetMeta
+    // sheetMeta
+    // user_access_token
+    // openid
     hasLogin: false,
-    openid: null,
   },
 });

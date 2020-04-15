@@ -3,14 +3,12 @@ const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const util = require("../../util/util.js");
 
-const rangeSpots = require("../../config.js").rangeSpots;
-const rangeCars = require("../../config.js").rangeCars;
-const ranges = [rangeSpots, rangeCars];
+const config = require("../../config.js").config;
 
-const sheetIdHistory = "O8jw1C";
-var rangeHistory = `${sheetIdHistory}!A2:E8`;
-const sheetIdTest = "m1JeYR";
-var rangeTest = `${sheetIdTest}!A2:E3`;
+const sheetIdSpots = config.sheetIds.spots;
+const sheetIdCars = config.sheetIds.cars;
+const sheetIdTest = config.sheetIds.test;
+const sheetIdHistory = config.sheetIds.history;
 
 const app = getApp();
 
@@ -34,26 +32,26 @@ Page({
       //   var str = JSON.stringify(res.data, undefined, 4);
       //   console.log(str);
       // });
+      // ttCloudApi
+      //   .sheetDelLines(token, sheetIdTest, 15, 18)
+      //   .then((res) => {
+      //     console.log(res.data);
+      //     var str = JSON.stringify(res.data, undefined, 4);
+      //     console.log(str);
+      //   })
+      //   .then(() => {
+      //     return ttCloudApi.sheetMeta(token);
+      //   })
+      //   .then((res) => {
+      //     console.log(res.data);
+      //     var str = JSON.stringify(res.data, undefined, 4);
+      //     console.log(str);
+      //     that.setData({
+      //       sheetMeta: res.data.data.sheets,
+      //     });
+      //   });
 
-      ttCloudApi
-        .sheetDelLines(token, sheetIdTest, 15, 18)
-        .then((res) => {
-          console.log(res.data);
-          var str = JSON.stringify(res.data, undefined, 4);
-          console.log(str);
-        })
-        .then(() => {
-          return ttCloudApi.sheetMeta(token);
-        })
-        .then((res) => {
-          console.log(res.data);
-          var str = JSON.stringify(res.data, undefined, 4);
-          console.log(str);
-
-          that.setData({
-            sheetMeta: res.data.data.sheets,
-          });
-        });
+      console.log(app);
     }
   },
   data: {

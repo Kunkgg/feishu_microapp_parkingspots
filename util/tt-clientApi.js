@@ -67,6 +67,7 @@ function login(app) {
     .then((res) => {
       // console.log(`in page, ${res.data.data.access_token}`);
       app.globalData.user_access_token = res.data.data.access_token;
+      app.globalData.open_id = res.data.data.open_id;
       // console.log(`in app, ${res.data.data.access_token}`);
     });
 }

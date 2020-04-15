@@ -59,10 +59,10 @@ function columnCharName(n) {
 }
 
 function logger(message, data = {}) {
-  console.log("-----------------");
+  console.log(">>>>>>>>>>>>>>>>>");
   console.log(`${message}`);
   console.log(data);
-  console.log("-----------------");
+  console.log("<<<<<<<<<<<<<<<<<");
 }
 
 module.exports = {
