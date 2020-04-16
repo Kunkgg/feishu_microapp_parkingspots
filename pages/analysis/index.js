@@ -10,8 +10,6 @@ var sheetIdHistory = config.sheetIds.history;
 const sheetIdEmptyHisory = config.sheetIds.empty_his;
 const sheetIdFakeHisory = config.sheetIds.fake_his;
 
-// TODO: change icon
-// TODO: change tab background color
 // TODO: refactor
 // TODO: in18
 

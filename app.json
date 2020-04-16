@@ -22,7 +22,7 @@
         "pagePath": "pages/analysis/index",
         "iconPath": "images/icon_analysis.png",
         "selectedIconPath": "images/icon_analysis_HL.png",
-        "text": "Analysis"
+        "text": "statistics"
       }
     ]
   },
