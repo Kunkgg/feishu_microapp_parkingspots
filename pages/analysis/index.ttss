@@ -78,3 +78,7 @@ body {
   padding: 0;
   /* border: red 2rpx solid; */
 }
+
+button {
+  margin-right: 5rpx;
+}

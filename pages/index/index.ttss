@@ -128,6 +128,5 @@ body {
 }
 
 button {
-  margin-top: 30rpx;
-  margin-bottom: 30rpx;
+  margin-right: 5rpx;
 }

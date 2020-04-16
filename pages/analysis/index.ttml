@@ -1,3 +1,8 @@
+<view class="container" style="flex-direction: row;">
+  <button type="primary" bindtap="clearFake">清空模拟数据</button>
+  <button type="primary" bindtap="importFake">导入模拟数据</button>
+</view>
+
 <view class="header">{{ title }}</view>
 
 <view class="container">

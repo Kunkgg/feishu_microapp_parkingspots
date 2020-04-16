@@ -10,8 +10,8 @@
     </block>
 </view>
 
-<!-- <view tt:if="{{fakeMode == true}}" class="contain" style="flex-direction: row;"> -->
-<view tt:if="{{ false }}" class="contain" style="flex-direction: row;">
+<view tt:if="{{fakeMode == true}}" class="container" style="flex-direction: row;">
+<!-- <view tt:if="{{ false }}" class="container" style="flex-direction: row;"> -->
     <button type="primary" bindtap="fakeData">FakeData</button>
     <button type="primary" bindtap="fakeCarIn">FakeCarIn</button>
     <button type="primary" bindtap="fakeCarOut">FakeCarOut</button>
