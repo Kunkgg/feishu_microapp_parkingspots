@@ -10,6 +10,9 @@ var sheetIdHistory = config.sheetIds.history;
 const sheetIdEmptyHisory = config.sheetIds.empty_his;
 const sheetIdFakeHisory = config.sheetIds.fake_his;
 
+// TODO: improve clearData method
+// TODO: change color of tab icon
+// TODO: fix generate fake data des sheet
 // TODO: refactor
 // TODO: in18
 // TODO: message bot
@@ -434,12 +437,13 @@ Page({
   clearData: function () {
     sheetIdHistory = sheetIdEmptyHisory;
 
+    this.data.history = [];
     util.logger("Clear display data...");
     this.onLoad();
   },
 
   realData: function () {
-    sheetIdHistory = sheetIdHistory;
+    sheetIdHistory = config.sheetIds.history;
 
     util.logger("Start Real data...");
     this.onLoad();
