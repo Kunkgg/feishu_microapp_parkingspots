@@ -344,7 +344,7 @@ Page({
         },
       ],
       disablePieStroke: true,
-      width: Math.floor(windowWidth / 1.5),
+      width: Math.floor(windowWidth / 2),
       height: 200,
       // dataLabel: true,
       dataLabel: false,

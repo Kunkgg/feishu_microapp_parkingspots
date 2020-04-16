@@ -27,8 +27,8 @@
   </view>
 </view>
 
-<view class="chart-title">最近 12 个月</view>
-<view class="container">
+<view class="line-container">
+  <view class="chart-title">最近 12 个月</view>
   <canvas
     canvas-id="last12Month"
     disable-scroll="true"
