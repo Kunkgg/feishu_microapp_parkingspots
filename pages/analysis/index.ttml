@@ -1,5 +1,39 @@
+<view class="header">{{ title }}</view>
+<!-- <view class="header" -->
+<!--   >row: {{ sheetMeta[3].rowCount }}, col: {{ sheetMeta[3].columnCount }}</view -->
+<!-- > -->
+<!-- <text tt:for="{{ history }}" -->
+<!--   >{{ item[0] }} {{ item[1] }} {{ item[2] }} {{ item[3] }} {{ item[4] }}</text -->
+<!-- > -->
 
-<view class="header">{{title}}</view>
-/* <view class="header">{{sheetMeta[3].title}} sheet</view> */
-/* <view class="header">row: {{sheetMeta[3].rowCount}}, col: {{sheetMeta[3].columnCount}}</view> */
-<text tt:for="{{history}}">{{item[0]}} {{item[1]}} {{item[2]}} {{item[3]}} {{item[4]}}</text>
+<view class="container">
+  <view class="ring-container">
+    <view class="chart-title">最近 1 天</view>
+    <canvas canvas-id="lastDay" disable-scroll="true" class="canvas"></canvas>
+  </view>
+
+  <view class="ring-container">
+    <view class="chart-title">最近 7 天</view>
+    <canvas canvas-id="lastWeek" disable-scroll="true" class="canvas"></canvas>
+  </view>
+
+  <view class="ring-container">
+    <view class="chart-title">最近 30 天</view>
+    <canvas canvas-id="lastMonth" disable-scroll="true" class="canvas"></canvas>
+  </view>
+
+  <view class="ring-container">
+    <view class="chart-title">最近 365 天</view>
+    <canvas canvas-id="lastYear" disable-scroll="true" class="canvas"></canvas>
+  </view>
+</view>
+
+<view class="chart-title">最近 12 个月</view>
+<view class="container">
+  <canvas
+    canvas-id="last12Month"
+    disable-scroll="true"
+    class="canvas canvas-lineChart"
+    bindtouchstart="touchHandler"
+  ></canvas>
+</view>

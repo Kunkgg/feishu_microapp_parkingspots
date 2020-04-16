@@ -2,6 +2,7 @@ const dwRequest = require("../../util/dw-request.js");
 const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const util = require("../../util/util.js");
+const wxCharts = require("../../util/wxcharts.js");
 
 const config = require("../../config.js").config;
 
@@ -11,6 +12,11 @@ const sheetIdTest = config.sheetIds.test;
 const sheetIdHistory = config.sheetIds.history;
 
 const app = getApp();
+
+var last12MonthlineChart = null;
+
+// var daulineChart = null;
+// var yuelineChart = null;
 
 // TODO: tab for chart of car move history
 // TODO: data chart for using rate of paking spots
@@ -44,7 +50,7 @@ Page({
     // history: array
     // title:   string
     // usageRate: object
-    title: "建衡技术车位信息统计",
+    title: "建衡技术车位使用率统计",
     spotnames: ["D-100", "D-101"],
     plates: ["陕AF19967", "陕A5P0J7", "京MC7816"],
   },
@@ -94,6 +100,7 @@ Page({
         util.logger("Loaded history from cloud", that.data);
 
         that.statistics();
+        // that.ringChart(that.data.usageRate.lastYear, "lastDay");
         // stop loading animate
         // ttClientApi.ttHideToast();
       });
@@ -177,6 +184,8 @@ Page({
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
     util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastDay"] = ur;
+
+    this.ringChart(ur, "lastDay");
   },
   usageRateLastWeek: function (usageRate) {
     var rangeStart = 1;
@@ -185,6 +194,8 @@ Page({
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
     util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastWeek"] = ur;
+
+    this.ringChart(ur, "lastWeek");
   },
   usageRateLastMonth: function (usageRate) {
     var rangeStart = 1;
@@ -193,6 +204,7 @@ Page({
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
     util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastMonth"] = ur;
+    this.ringChart(ur, "lastMonth");
   },
   usageRateLastYear: function (usageRate) {
     var rangeStart = 1;
@@ -201,6 +213,7 @@ Page({
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
     util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastYear"] = ur;
+    this.ringChart(ur, "lastYear");
   },
 
   usageRateLast12Month: function (usageRate) {
@@ -242,23 +255,159 @@ Page({
         (today - targetMonthStart) / (3600 * 24 * 1000)
       );
 
+      var start = new Date(targetMonthStart);
+      // var end = new Date(targetMonthEnd);
       var range = [rangeStart, rangeEnd];
-      monthRanges.push(range);
+      var monthString = `${start.getFullYear()}-${start.getMonth() + 1}`;
+      var rangeDesc = { range: range, monthString: monthString };
+
+      monthRanges.push(rangeDesc);
       // console.log(`range last ${i + 1} month`);
       // console.log(range);
-      // var s = new Date(targetMonthStart);
-      // var e = new Date(targetMonthEnd);
-      // console.log(util.dateTimeString(s));
-      // console.log(util.dateTimeString(e));
+      // console.log(util.dateTimeString(start));
+      // console.log(util.dateTimeString(end));
     }
 
     for (var i = 0; i < monthRanges.length; i++) {
-      var timeRange = monthRanges[i];
+      var timeRange = monthRanges[i].range;
       var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-      last12Month.push(ur);
+      last12Month.push([monthRanges[i].monthString, ur]);
+      util.logger(`last ${i + 1} monthString`, monthRanges[i].monthString);
       util.logger(`last ${i + 1} month`, ur);
     }
 
     usageRate[last12Month] = last12Month;
+
+    this.lineChart(last12Month, "last12Month");
+  },
+
+  ringChart: function (ur, canvasId) {
+    var windowWidth = app.globalData.windowWidth;
+
+    var usedPercent = (ur * 100).toFixed(2);
+    var unUsedPercent = 100 - usedPercent;
+
+    new wxCharts({
+      animation: true,
+      canvasId: canvasId,
+      type: "ring",
+      extra: {
+        ringWidth: 25,
+        pie: {
+          // offsetAngle: -45,
+          offsetAngle: -90,
+        },
+      },
+      background: "#f5f6f7",
+      title: {
+        name: `${usedPercent}%`,
+        // blue
+        color: "#3370ff",
+        fontSize: 18,
+      },
+      series: [
+        {
+          name: "Used",
+          data: usedPercent * 1,
+          // red
+          color: "#ea514d",
+          stroke: false,
+        },
+        {
+          name: "unUsed",
+          // green
+          // color: "#34c724",
+          color: "#59d549",
+          data: unUsedPercent,
+          stroke: false,
+        },
+      ],
+      disablePieStroke: true,
+      width: Math.floor(windowWidth / 1.5),
+      height: 200,
+      // dataLabel: true,
+      dataLabel: false,
+      legend: false,
+      padding: 0,
+    });
+  },
+
+  formatLineChartData: function (datas) {
+    var categories = [];
+    var data = [];
+
+    var data = datas.map((x) => x[1]);
+    var categories = datas.map((x) => x[0]);
+
+    return {
+      categories: categories,
+      data: data,
+    };
+  },
+
+  touchHandler: function (e) {
+    console.log(last12MonthlineChart.getCurrentDataIndex(e));
+    last12MonthlineChart.showToolTip(e, {
+      // background: '#7cb5ec',
+      format: function (item, category) {
+        return category + " " + item.name + ":" + item.data;
+      },
+    });
+  },
+
+  lineChart: function (datas, canvasId) {
+    var windowWidth = app.globalData.windowWidth;
+    var formatedData = this.formatLineChartData(datas);
+
+    last12MonthlineChart = new wxCharts({
+      canvasId: canvasId,
+      type: "line",
+      categories: formatedData.categories,
+      animation: true,
+      // background: "transparent",
+      series: [
+        {
+          name: "月份",
+          data: formatedData.data,
+          format: function (val, name) {
+            return (val * 100).toFixed(2) + "%";
+          },
+          color: "#3370ff",
+        },
+      ],
+      xAxis: {
+        disableGrid: true,
+        titleFontColor: "#f5f6f7",
+        fontColor: "#f5f6f7",
+      },
+      yAxis: {
+        title: "使用率 (%)",
+        format: function (val) {
+          return val.toFixed(2);
+        },
+        min: 0,
+        titleFontColor: "#f5f6f7",
+        fontColor: "#f5f6f7",
+        gridColor: "#666666",
+      },
+      width: windowWidth,
+      height: 200,
+      dataLabel: false,
+      dataPointShape: true,
+      extra: {
+        lineStyle: "curve",
+        legendTextColor: "#f5f6f7",
+      },
+    });
   },
 });
+
+// /* background: #fde2e2; */ /* red light */
+// /* background: #faf1d1; */ /* yellow light */
+// /* background: #d9f5d6; */ /* green light */
+// /* background: #e1eaff; */ /* blue light */
+// background: #34c724; /* green */
+// background: #ffc60a; /* yellow */
+// background: #3370ff; /* blue */
+// background: #f5f6f7; /* grey */
+// background: #f54a45; /* red */
