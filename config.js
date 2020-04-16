@@ -9,7 +9,8 @@ var config = {
     spots: "5a3db1",
     cars: "pcnBE5",
     history: "O8jw1C",
-    test: "m1JeYR",
+    empty_his: "m1JeYR",
+    fake_his: "fyfzjB",
   },
 };
 

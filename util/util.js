@@ -85,10 +85,12 @@ function sum(input) {
   return total;
 }
 
-function logger(message, data = {}) {
+function logger(message, data = null) {
   console.log(">>>>>>>>>>>>>>>>>");
   console.log(`${message}`);
-  console.log(data);
+  if (data != null) {
+    console.log(data);
+  }
   console.log("<<<<<<<<<<<<<<<<<");
 }
 

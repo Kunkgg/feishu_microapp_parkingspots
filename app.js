@@ -1,3 +1,5 @@
+const util = require("./util/util.js");
+
 App({
   onLaunch: function (args) {
     console.log("App Launch");

@@ -6,12 +6,10 @@ const wxCharts = require("../../util/wxcharts.js");
 
 const config = require("../../config.js").config;
 
-const sheetIdSpots = config.sheetIds.spots;
-const sheetIdCars = config.sheetIds.cars;
-const sheetIdTest = config.sheetIds.test;
-const sheetIdHistory = config.sheetIds.history;
+var sheetIdHistory = config.sheetIds.history;
+const sheetIdEmptyHisory = config.sheetIds.empty_his;
+const sheetIdFakeHisory = config.sheetIds.fake_his;
 
-// TODO: add fake data clear button
 // TODO: change icon
 // TODO: change tab background color
 // TODO: refactor
@@ -45,12 +43,12 @@ Page({
   },
 
   data: {
-    // history: array
-    // title:   string
-    // usageRate: object
+    // history:     array
+    // title:       string
+    // usageRate:   object
     title: "建衡技术车位使用率统计",
-    spotnames: ["D-100", "D-101"],
-    plates: ["陕AF19967", "陕A5P0J7", "京MC7816"],
+    spotnames: app.globalData.spotnames,
+    plates: app.globalData.plates,
   },
 
   loadSheetMeta: function () {
@@ -61,10 +59,20 @@ Page({
       .then((res) => {
         var sheetMeta = res.data.data;
 
+        var sheetHistMeta = sheetMeta.sheets.filter((x) => {
+          return x.sheetId == sheetIdHistory;
+        })[0];
+        util.logger("sheetHistMeta", sheetHistMeta);
+
         // make spots and cars sheet range
-        var lastColSpots = util.columnCharName(sheetMeta.sheets[2].columnCount);
-        var lastRowSpots = sheetMeta.sheets[2].rowCount;
-        var rangeHist = `${sheetIdHistory}!A2:${lastColSpots}${lastRowSpots}`;
+        var lastRowSpots = sheetHistMeta.rowCount;
+
+        if (lastRowSpots > 1) {
+          var lastColSpots = util.columnCharName(sheetHistMeta.columnCount);
+          var rangeHist = `${sheetIdHistory}!A2:${lastColSpots}${lastRowSpots}`;
+        } else {
+          rangeHist = "";
+        }
 
         that.setData({
           range: rangeHist,
@@ -80,20 +88,35 @@ Page({
   loadHistoryData: function () {
     var that = this;
 
+    util.logger("Current sheetIdHistory", sheetIdHistory);
     // get sheetMeta for making data ranges
     that
       .loadSheetMeta()
       .then(() => {
-        // load history data from cloud
-        return ttCloudApi.sheetReadRange(
-          app.globalData.user_access_token,
-          that.data.range
-        );
+        if (that.data.range != "") {
+          // load history data from cloud
+          return ttCloudApi.sheetReadRange(
+            app.globalData.user_access_token,
+            that.data.range
+          );
+        } else {
+          var p = new Promise((resolve) => {
+            util.logger("The history in cloud is empty");
+            return resolve(false);
+          });
+          return p;
+        }
       })
       .then((res) => {
-        that.setData({
-          history: that.cleanHistoryData(res.data.data.valueRange.values),
-        });
+        if (res) {
+          that.setData({
+            history: that.cleanHistoryData(res.data.data.valueRange.values),
+          });
+        } else {
+          that.setData({
+            history: [],
+          });
+        }
 
         util.logger("Loaded history from cloud", that.data);
 
@@ -180,7 +203,7 @@ Page({
     var rangeEnd = 1;
     var timeRange = [rangeStart, rangeEnd];
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastDay"] = ur;
 
     this.ringChart(ur, "lastDay");
@@ -190,7 +213,7 @@ Page({
     var rangeEnd = 7;
     var timeRange = [rangeStart, rangeEnd];
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastWeek"] = ur;
 
     this.ringChart(ur, "lastWeek");
@@ -200,7 +223,7 @@ Page({
     var rangeEnd = 30;
     var timeRange = [rangeStart, rangeEnd];
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastMonth"] = ur;
     this.ringChart(ur, "lastMonth");
   },
@@ -209,7 +232,7 @@ Page({
     var rangeEnd = 365;
     var timeRange = [rangeStart, rangeEnd];
     var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
+    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
     usageRate["lastYear"] = ur;
     this.ringChart(ur, "lastYear");
   },
@@ -270,8 +293,8 @@ Page({
       var timeRange = monthRanges[i].range;
       var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
       last12Month.push([monthRanges[i].monthString, ur]);
-      util.logger(`last ${i + 1} monthString`, monthRanges[i].monthString);
-      util.logger(`last ${i + 1} month`, ur);
+      // util.logger(`last ${i + 1} monthString`, monthRanges[i].monthString);
+      // util.logger(`last ${i + 1} month`, ur);
     }
 
     usageRate[last12Month] = last12Month;
@@ -397,6 +420,20 @@ Page({
         legendTextColor: "#f5f6f7",
       },
     });
+  },
+
+  clearFake: function () {
+    sheetIdHistory = sheetIdEmptyHisory;
+
+    this.onLoad();
+  },
+  importFake: function () {
+    sheetIdHistory = sheetIdFakeHisory;
+
+    util.logger("Start Import fake data...");
+    // util.logger("Current sheetIdHistory", sheetIdHistory);
+
+    this.onLoad();
   },
 });
 

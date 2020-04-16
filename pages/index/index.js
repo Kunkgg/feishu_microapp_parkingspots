@@ -7,14 +7,12 @@ const config = require("../../config.js").config;
 
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
-const sheetIdTest = config.sheetIds.test;
 const sheetIdHistory = config.sheetIds.history;
 
 console.log("-----------------");
 console.log("Loaded config ...");
 console.log(sheetIdSpots);
 console.log(sheetIdCars);
-console.log(sheetIdTest);
 console.log(sheetIdHistory);
 console.log("-----------------");
 
@@ -110,10 +108,18 @@ Page({
       })
       .then((res) => {
         // extra plates from cars sheet
+        var spotnames = [];
         var plates = [];
+        res.data.data.valueRanges[0].values.forEach((spot) => {
+          spotnames.push(spot[1]);
+        });
+
         res.data.data.valueRanges[1].values.forEach((car) => {
           plates.push(car[1]);
         });
+
+        app.globalData.spotnames = spotnames;
+        app.globalData.plates = plates;
 
         that.setData({
           spots: res.data.data.valueRanges[0].values,

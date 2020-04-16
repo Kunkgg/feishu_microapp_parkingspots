@@ -89,6 +89,10 @@ function apiUrl_sheetInsertLines(sheetToken) {
 function apiUrl_sheetLines(sheetToken) {
   return apiUrl_baseSheet + sheetToken + "/dimension_range";
 }
+
+function apiUrl_sheetSubSheet(sheetToken) {
+  return apiUrl_baseSheet + sheetToken + "/sheets_batch_update";
+}
 // ======}}}
 
 // === API folder === {{{
@@ -537,6 +541,31 @@ function sheetDelLines(
   });
 }
 
+function sheetSubSheet(
+  access_token,
+  subSheetRequests,
+  sheetToken = defaultSheetToken
+) {
+  // subSheetRequests: object array, describe the actions of subsheet
+  // addSheet, copySheet, deleteSheet
+  var data = {
+    dimension: {
+      requests: subSheetRequests,
+    },
+  };
+  var auth = `Bearer ${access_token}`;
+
+  return dwPromisify(tt.request)({
+    url: apiUrl_sheetSubSheet(sheetToken),
+    data: data,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
 // ======}}}
 
 module.exports = {
@@ -559,4 +588,6 @@ module.exports = {
   sheetAppendLines: sheetAppendLines,
   sheetUpdateLines: sheetUpdateLines,
   sheetDelLines: sheetDelLines,
+  sheetSubSheet,
+  sheetSubSheet,
 };
