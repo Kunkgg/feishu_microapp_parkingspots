@@ -12,6 +12,7 @@ var config = {
     empty_his: "m1JeYR",
     fake_his: "fyfzjB",
   },
+  showLoading: true,
 };
 
 module.exports = {

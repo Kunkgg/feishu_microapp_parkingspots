@@ -1,6 +1,8 @@
+<text>测试按钮: </text>
 <view class="container" style="flex-direction: row;">
-  <button type="primary" bindtap="clearFake">清空模拟数据</button>
   <button type="primary" bindtap="importFake">导入模拟数据</button>
+  <button type="primary" bindtap="clearData">清空显示数据</button>
+  <button type="primary" bindtap="realData">显示实际数据</button>
 </view>
 
 <view class="header">{{ title }}</view>

@@ -82,4 +82,9 @@ body {
 
 button {
   margin-right: 5rpx;
+  font-size: 14rpx;
+}
+
+text {
+  font-size: 14rpx;
 }

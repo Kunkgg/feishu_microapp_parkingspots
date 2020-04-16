@@ -12,6 +12,7 @@ const sheetIdFakeHisory = config.sheetIds.fake_his;
 
 // TODO: refactor
 // TODO: in18
+// TODO: message bot
 
 const app = getApp();
 
@@ -21,8 +22,10 @@ Page({
   onLoad: function () {
     var that = this;
 
-    // start loading animate
-    // ttClientApi.ttShowLoading("Loading...", true);
+    if (config.showLoading) {
+      // start loading animate
+      ttClientApi.ttShowLoading("Loading...", true);
+    }
     if (this.data.hasLogin) {
       util.logger("Already login");
 
@@ -119,9 +122,10 @@ Page({
         util.logger("Loaded history from cloud", that.data);
 
         that.statistics();
-        // that.ringChart(that.data.usageRate.lastYear, "lastDay");
-        // stop loading animate
-        // ttClientApi.ttHideToast();
+        if (config.showLoading) {
+          // stop loading animate
+          ttClientApi.ttHideToast();
+        }
       });
   },
 
@@ -420,17 +424,24 @@ Page({
     });
   },
 
-  clearFake: function () {
-    sheetIdHistory = sheetIdEmptyHisory;
-
-    this.onLoad();
-  },
   importFake: function () {
     sheetIdHistory = sheetIdFakeHisory;
 
     util.logger("Start Import fake data...");
-    // util.logger("Current sheetIdHistory", sheetIdHistory);
+    this.onLoad();
+  },
 
+  clearData: function () {
+    sheetIdHistory = sheetIdEmptyHisory;
+
+    util.logger("Clear display data...");
+    this.onLoad();
+  },
+
+  realData: function () {
+    sheetIdHistory = sheetIdHistory;
+
+    util.logger("Start Real data...");
     this.onLoad();
   },
 });

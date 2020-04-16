@@ -22,8 +22,10 @@ Page({
   onLoad: function () {
     var that = this;
 
-    // start loading animate
-    // ttClientApi.ttShowLoading("Loading...", true);
+    if (config.showLoading) {
+      // start loading animate
+      ttClientApi.ttShowLoading("Loading...", true);
+    }
     if (this.data.hasLogin) {
       util.logger("Already login");
 
@@ -127,8 +129,11 @@ Page({
           plates: plates,
         });
         util.logger("Loaded data from cloud", that.data);
-        // stop loading animate
-        // ttClientApi.ttHideToast();
+
+        if (config.showLoading) {
+          // stop loading animate
+          ttClientApi.ttHideToast();
+        }
       });
   },
 
