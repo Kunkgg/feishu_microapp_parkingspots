@@ -11,17 +11,15 @@ const sheetIdCars = config.sheetIds.cars;
 const sheetIdTest = config.sheetIds.test;
 const sheetIdHistory = config.sheetIds.history;
 
+// TODO: add fake data clear button
+// TODO: change icon
+// TODO: change tab background color
+// TODO: refactor
+// TODO: in18
+
 const app = getApp();
 
 var last12MonthlineChart = null;
-
-// var daulineChart = null;
-// var yuelineChart = null;
-
-// TODO: tab for chart of car move history
-// TODO: data chart for using rate of paking spots
-// TODO: management tab for adding or delete information of car and spot by admin
-// TODO: make full feishu api
 
 Page({
   onLoad: function () {

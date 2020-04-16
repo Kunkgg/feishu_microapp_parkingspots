@@ -20,11 +20,6 @@ console.log("-----------------");
 
 const app = getApp();
 
-// TODO: Mok fake data
-// TODO: data chart for using rate of paking spots
-// TODO: management tab for adding or delete information of car and spot by admin
-// TODO: make full feishu api
-
 Page({
   onLoad: function () {
     var that = this;
