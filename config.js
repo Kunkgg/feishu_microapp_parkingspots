@@ -1,4 +1,4 @@
-const sheetToken = "shtcniUwsF4rGBfJTenE7JuNmWg";
+const sheetToken = "shtcnTNuG88jU9y2Ldfp9ZgjjUb";
 const folderToken = "fldcnQ7Qa7RosZTqvzaHveun0og";
 
 var config = {
@@ -8,9 +8,9 @@ var config = {
   sheetIds: {
     spots: "5a3db1",
     cars: "pcnBE5",
-    history: "O8jw1C",
-    empty_his: "m1JeYR",
-    fake_his: "fyfzjB",
+    history: "2k97WA",
+    empty_his: "MxrYrB",
+    fake_his: "efOlXV",
   },
   showLoading: true,
 };
