@@ -3,19 +3,25 @@ const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const util = require("../../util/util.js");
 const wxCharts = require("../../util/wxcharts.js");
-
 const config = require("../../config.js").config;
 
-var sheetIdHistory = config.sheetIds.history;
-const sheetIdEmptyHisory = config.sheetIds.empty_his;
-const sheetIdFakeHisory = config.sheetIds.fake_his;
+const sheetIdEmptyHistory = config.sheetIds.empty_his;
+const sheetIdFakeHistory = config.sheetIds.fake_his;
+const sheetIds = {
+  history: config.sheetIds.history,
+  emptyHist: sheetIdEmptyHistory,
+  fakeHist: sheetIdFakeHistory,
+};
 
+var sheetIdHistory = config.sheetIds.history;
+
+// TODO: display the method of useage rate
+// TODO: message bot
 // TODO: improve clearData method
 // TODO: change color of tab icon
 // TODO: fix generate fake data des sheet
 // TODO: refactor
 // TODO: in18
-// TODO: message bot
 
 const app = getApp();
 
@@ -89,9 +95,18 @@ Page({
       });
   },
 
+  currentHistoryName: function () {
+    for (let [key, value] of Object.entries(sheetIds)) {
+      if (value == sheetIdHistory) {
+        return key;
+      }
+    }
+  },
+
   loadHistoryData: function () {
     var that = this;
 
+    util.logger("Current sheetIdHistory Name", that.currentHistoryName());
     util.logger("Current sheetIdHistory", sheetIdHistory);
     // get sheetMeta for making data ranges
     that
@@ -133,6 +148,7 @@ Page({
   },
 
   cleanHistoryData: function (history) {
+    // clean the history items, reserve the completed history items
     return history.filter((x) => x[3] && x[4]);
   },
 
@@ -182,6 +198,10 @@ Page({
       util.sum(targetHisList.map((x) => stayTime(x[3], x[4], endRangeTime))) /
         1000
     );
+
+    if (spots.length == 0) {
+      return 0;
+    }
 
     var totalTime =
       (daysRange[1] - daysRange[0] + 1) * 24 * 3600 * spots.length;
@@ -266,7 +286,7 @@ Page({
       } else {
         var y = now.getFullYear();
         var m = now.getMonth() - targetMonthDistance;
-        var yEnd = y + 1;
+        var yEnd = y;
         var mEnd = m + 1;
       }
       var targetMonthStart = new Date(y, m);
@@ -282,12 +302,13 @@ Page({
       );
 
       var start = new Date(targetMonthStart);
-      // var end = new Date(targetMonthEnd);
       var range = [rangeStart, rangeEnd];
       var monthString = `${start.getFullYear()}-${start.getMonth() + 1}`;
       var rangeDesc = { range: range, monthString: monthString };
 
       monthRanges.push(rangeDesc);
+
+      // var end = new Date(targetMonthEnd);
       // console.log(`range last ${i + 1} month`);
       // console.log(range);
       // console.log(util.dateTimeString(start));
@@ -362,8 +383,8 @@ Page({
     var categories = [];
     var data = [];
 
-    var data = datas.map((x) => x[1]);
     var categories = datas.map((x) => x[0]);
+    var data = datas.map((x) => x[1]);
 
     return {
       categories: categories,
@@ -384,6 +405,9 @@ Page({
   lineChart: function (datas, canvasId) {
     var windowWidth = app.globalData.windowWidth;
     var formatedData = this.formatLineChartData(datas);
+
+    // util.logger("UnformatedData", datas);
+    // util.logger("formatedData", formatedData);
 
     last12MonthlineChart = new wxCharts({
       canvasId: canvasId,
@@ -428,14 +452,14 @@ Page({
   },
 
   importFake: function () {
-    sheetIdHistory = sheetIdFakeHisory;
+    sheetIdHistory = sheetIdFakeHistory;
 
     util.logger("Start Import fake data...");
     this.onLoad();
   },
 
   clearData: function () {
-    sheetIdHistory = sheetIdEmptyHisory;
+    sheetIdHistory = sheetIdEmptyHistory;
 
     this.data.history = [];
     util.logger("Clear display data...");
