@@ -105,7 +105,7 @@ function fixLengthString(s, len) {
 
 function shortTimeString(timeString) {
   //e.g. 2017/08/10 23:24:25 -> 17/08/10 23:24
-  return timeString.slice(3, timeString.length - 3);
+  return timeString.slice(2, timeString.length - 3);
 }
 module.exports = {
   formatTime: formatTime,
