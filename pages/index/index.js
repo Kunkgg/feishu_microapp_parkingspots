@@ -20,6 +20,7 @@ console.log("-----------------");
 
 const app = getApp();
 
+// TODO: get chat_id by whitelist
 Page({
   onLoad: function () {
     var that = this;

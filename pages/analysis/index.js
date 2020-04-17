@@ -15,7 +15,8 @@ const sheetIds = {
 
 var sheetIdHistory = config.sheetIds.history;
 
-// TODO: message bot
+// TODO: msg bot, lanuch micro app from chat session
+// TODO: hide fake buttons in default
 // TODO: combine the network requests of record history
 // TODO: deal with the border statustion of create history
 // TODO: improve clearData method
