@@ -3,6 +3,7 @@ const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const ttBot = require("../../util/tt-msgbot");
 const util = require("../../util/util.js");
+var cardContent = require("./spotsStatusCardContent.js").cardContent;
 
 const config = require("../../config.js").config;
 
@@ -10,6 +11,7 @@ const chat_id = require("../../config.js").chat_id;
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
 const sheetIdHistory = config.sheetIds.history;
+var appLinkOpenMicroApp = `https://applink.feishu.cn/client/mini_program/open?appId=${config.app_id}&mode=window`;
 
 console.log("-----------------");
 console.log("Loaded config ...");
@@ -270,7 +272,8 @@ Page({
             if (res.data.code == 0) {
               that.setSpots(targetIndex, "", "pop", fake);
               that.updateCloudSpots();
-              that.sendSpotsStatusMsg();
+              // that.sendSpotsStatusMsg();
+              that.sendSpotsStatusCard();
               util.logger("carOut successed");
             }
             console.log(res.data);
@@ -356,7 +359,8 @@ Page({
           })
           .then(() => {
             that.updateCloudSpots();
-            that.sendSpotsStatusMsg();
+            that.sendSpotsStatusCard();
+            // that.sendSpotsStatusMsg();
           });
       }
     );
@@ -398,7 +402,7 @@ Page({
     if (spot[5]) {
       mtime = util.shortTimeString(spot[5]);
     } else {
-      mtime = util.fixLengthString(mtim, mtimeCase.length);
+      mtime = util.fixLengthString(mtime, mtimeCase.length);
     }
 
     return `${spotName} | ${spotStatus} | ${lastEditor} | ${mtime}`;
@@ -412,6 +416,19 @@ Page({
     });
 
     return msgHeader + msgBody;
+    // return msgBody;
+  },
+
+  spotsStatusCard: function () {
+    var spots = this.data.spots;
+    cardContent.elements[0].fields[0].text.content = this._formatSpotStatus(
+      spots[0]
+    ).slice(6, -1);
+    cardContent.elements[1].fields[0].text.content = this._formatSpotStatus(
+      spots[1]
+    ).slice(6, -1);
+
+    cardContent.elements[2].actions[0].url = appLinkOpenMicroApp;
   },
 
   sendSpotsStatusMsg: function () {
@@ -431,6 +448,23 @@ Page({
     }
   },
 
+  sendSpotsStatusCard: function () {
+    if (config.msgBot) {
+      this.spotsStatusCard();
+      var receiver = {
+        // open_id: app.globalData.open_id,
+        chat_id: chat_id,
+      };
+      util.logger("spots status card", cardContent);
+
+      return ttBot
+        .sendCardMsg(app.globalData.tenant_access_token, cardContent, receiver)
+        .then((res) => {
+          util.logger("Bot card sended...");
+          util.logger("Bot card res", res);
+        });
+    }
+  },
   fake: {
     costTime: 5 * 60,
     counter: 0,
