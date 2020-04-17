@@ -1,10 +1,12 @@
 const dwRequest = require("../../util/dw-request.js");
 const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
+const ttBot = require("../../util/tt-msgbot");
 const util = require("../../util/util.js");
 
 const config = require("../../config.js").config;
 
+const chat_id = require("../../config.js").chat_id;
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
 const sheetIdHistory = config.sheetIds.history;
@@ -267,6 +269,7 @@ Page({
             if (res.data.code == 0) {
               that.setSpots(targetIndex, "", "pop", fake);
               that.updateCloudSpots();
+              that.sendSpotsStatusMsg();
               util.logger("carOut successed");
             }
             console.log(res.data);
@@ -350,7 +353,10 @@ Page({
               that.setSpots(targetIndex, plate, "push", fake);
             }
           })
-          .then(that.updateCloudSpots);
+          .then(() => {
+            that.updateCloudSpots();
+            that.sendSpotsStatusMsg();
+          });
       }
     );
   },
@@ -365,6 +371,62 @@ Page({
       that.carOut(targetIndex);
     } else {
       that.carIn(targetIndex);
+    }
+  },
+
+  _formatSpotStatus: function (spot) {
+    var plateCase = "xAFxxxxx";
+    var mtimeCase = "20/04/17 08:05";
+    var lastEditorCase = "王大壮士";
+    var spotName = spot[1];
+    var spotStatus = "";
+    var lastEditor = "";
+    var mtime = "";
+
+    if (spot[2]) {
+      spotStatus = util.fixLengthString(spot[2], plateCase.length);
+    } else {
+      spotStatus = util.fixLengthString("空闲", plateCase.length);
+    }
+    if (spot[3]) {
+      lastEditor = util.fixLengthString(spot[3], 3);
+    } else {
+      lastEditor = util.fixLengthString(lastEditor, lastEditorCase.length);
+    }
+
+    if (spot[5]) {
+      mtime = util.shortTimeString(spot[5]);
+    } else {
+      mtime = util.fixLengthString(mtim, mtimeCase.length);
+    }
+
+    return `${spotName} | ${spotStatus} | ${lastEditor} | ${mtime}`;
+  },
+
+  spotsStatusMsg: function () {
+    var msgHeader = "车位状态更新提示:\n";
+    var msgBody = "";
+    this.data.spots.forEach((x) => {
+      msgBody = msgBody + this._formatSpotStatus(x) + "\n";
+    });
+
+    return msgHeader + msgBody;
+  },
+
+  sendSpotsStatusMsg: function () {
+    if (config.msgBot) {
+      var content = this.spotsStatusMsg();
+      var receiver = {
+        // open_id: app.globalData.open_id,
+        chat_id: chat_id,
+      };
+      util.logger("spots status msg", content);
+      return ttBot
+        .sendTextMsg(app.globalData.tenant_access_token, content, receiver)
+        .then((res) => {
+          util.logger("Bot msg sended...");
+          util.logger("Bot msg res", res);
+        });
     }
   },
 

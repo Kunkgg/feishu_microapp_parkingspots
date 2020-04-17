@@ -588,6 +588,5 @@ module.exports = {
   sheetAppendLines: sheetAppendLines,
   sheetUpdateLines: sheetUpdateLines,
   sheetDelLines: sheetDelLines,
-  sheetSubSheet,
-  sheetSubSheet,
+  sheetSubSheet: sheetSubSheet,
 };

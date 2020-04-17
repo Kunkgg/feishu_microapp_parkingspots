@@ -94,12 +94,28 @@ function logger(message, data = null) {
   console.log("<<<<<<<<<<<<<<<<<");
 }
 
+function fixLengthString(s, len) {
+  if (s.length <= len) {
+    for (let i = 0; i < len - s.length; i++) {
+      s = s + " ";
+    }
+  }
+  return s;
+}
+
+function shortTimeString(timeString) {
+  //e.g. 2017/08/10 23:24:25 -> 17/08/10 23:24
+  return timeString.slice(3, timeString.length - 3);
+}
 module.exports = {
   formatTime: formatTime,
   formatLocation: formatLocation,
   dateTimeString: dateTimeString,
   dateString: dateString,
+  shortTimeString,
+  shortTimeString,
   columnCharName: columnCharName,
   logger: logger,
   sum: sum,
+  fixLengthString: fixLengthString,
 };

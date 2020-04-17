@@ -29,6 +29,7 @@ source ./token
 cat >./config.js <<EOF
 const sheetToken = "<sheetToken>";
 const folderToken = "<folderToken>";
+const chat_id = "oc_1f5ac5bd6569328f5db6819ad207d5bd";
 
 var config = {
   app_id: "<app_id>",
@@ -42,6 +43,7 @@ var config = {
     fake_his: "<sheetIdFakeHist>",
   },
   showLoading: true,
+  msgBot: true,
 };
 
 module.exports = {

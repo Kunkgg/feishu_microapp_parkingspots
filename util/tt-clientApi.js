@@ -62,12 +62,16 @@ function login(app) {
   return Promise.all([ttLogin(), ttGetAppAccessToken()])
     .then((res) => {
       console.log("Got login code and app_access_token");
+      console.log("App access token response:");
+      console.log(res[1].data);
+      app.globalData.tenant_access_token = res[1].data.tenant_access_token;
       return ttCode2Session(res[0].code, res[1].data.app_access_token);
     })
     .then((res) => {
       // console.log(`in page, ${res.data.data.access_token}`);
       app.globalData.user_access_token = res.data.data.access_token;
       app.globalData.open_id = res.data.data.open_id;
+      console.log(`open_id: ${app.globalData.open_id}`);
       // console.log(`in app, ${res.data.data.access_token}`);
     });
 }
