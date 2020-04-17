@@ -21,4 +21,5 @@ module.exports = {
   config: config,
   sheetToken: sheetToken,
   folderToken: folderToken,
+  chat_id: chat_id,
 };
