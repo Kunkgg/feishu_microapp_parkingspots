@@ -10,6 +10,8 @@
 # test_sheetIdHist="<test_sheetIdHist>"
 # test_sheetIdEmptyHist="<test_sheetIdEmptyHist>"
 # test_sheetIdFakeHist="<test_sheetIdFakeHist>"
+# test_receiverIdKind="<test_receiverIdKind>"
+# test_receiverId="<test_receiverId>"
 
 # deploy_sheetToken="<deploy_sheetToken>"
 # deploy_folderToken="<deploy_folderToken>"
@@ -18,6 +20,8 @@
 # deploy_sheetIdHist="<deploy_sheetIdHist>"
 # deploy_sheetIdEmptyHist="<deploy_sheetIdEmptyHist>"
 # deploy_sheetIdFakeHist="<deploy_sheetIdFakeHist>"
+# deploy_receiverIdKind="<deploy_receiverIdKind>"
+# deploy_receiverId="<deploy_receiverId>"
 #
 # app_id="<app_id>"
 # app_secret="<app_secret>"
@@ -29,7 +33,6 @@ source ./token
 cat >./config.js <<EOF
 const sheetToken = "<sheetToken>";
 const folderToken = "<folderToken>";
-const chat_id = "oc_1f5ac5bd6569328f5db6819ad207d5bd";
 
 var config = {
   app_id: "<app_id>",
@@ -44,12 +47,18 @@ var config = {
   },
   showLoading: true,
   msgBot: true,
+  msgReceiver: {
+  <receiverIdKind>: "<receiverId>",
+  },
 };
+
+var appLink = \`https://applink.feishu.cn/client/mini_program/open?appId=\${config.app_id}&mode=window\`;
 
 module.exports = {
   config: config,
   sheetToken: sheetToken,
   folderToken: folderToken,
+  appLink: appLink,
 };
 EOF
 
@@ -61,6 +70,8 @@ function _test(){
     sheetIdHist="${test_sheetIdHist}"
     sheetIdEmptyHist="${test_sheetIdEmptyHist}"
     sheetIdFakeHist="${test_sheetIdFakeHist}"
+    receiverIdKind="${test_receiverIdKind}"
+    receiverId="${test_receiverId}"
 
     _config
 }
@@ -73,6 +84,8 @@ function _deploy(){
     sheetIdHist="${deploy_sheetIdHist}"
     sheetIdEmptyHist="${deploy_sheetIdEmptyHist}"
     sheetIdFakeHist="${deploy_sheetIdFakeHist}"
+    receiverIdKind="${deploy_receiverIdKind}"
+    receiverId="${deploy_receiverId}"
 
     _config
 }
@@ -87,10 +100,24 @@ function _config(){
     sed -i "s/<sheetIdHist>/${sheetIdHist}/" config.js
     sed -i "s/<sheetIdEmptyHist>/${sheetIdEmptyHist}/" config.js
     sed -i "s/<sheetIdFakeHist>/${sheetIdFakeHist}/" config.js
+    sed -i "s/<receiverIdKind>/${receiverIdKind}/" config.js
+    sed -i "s/<receiverId>/${receiverId}/" config.js
+}
+
+function _check(){
+    current_sheetToken="$(cat config.js | head -n1 | grep -E -o \"\.\*\" | tr -d '"')"
+    if [[ "${current_sheetToken}" == "${test_sheetToken}" ]]; then
+        echo "test config is using"
+    elif [[ "${current_sheetToken}" == "${deploy_sheetToken}" ]]; then
+        echo "deploy config is using"
+    else
+        echo "unkown config is using"
+    fi
 }
 
 case $1 in
-    test) _test; cat ./config.js ;;
-    deploy) _deploy; cat ./config.js ;;
+    test) _test; _check ;;
+    deploy) _deploy; _check ;;
+    check) _check;;
     *) echo "Usage: ./make [test|deploy]"; exit 1 ;;
 esac

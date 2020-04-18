@@ -15,6 +15,7 @@ const sheetIds = {
 
 var sheetIdHistory = config.sheetIds.history;
 
+// TODO: refresh while pull down
 // TODO: msg bot, lanuch micro app from chat session
 // TODO: hide fake buttons in default
 // TODO: combine the network requests of record history

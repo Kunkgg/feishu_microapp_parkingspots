@@ -7,11 +7,12 @@ var cardContent = require("./spotsStatusCardContent.js").cardContent;
 
 const config = require("../../config.js").config;
 
-const chat_id = "oc_1f5ac5bd6569328f5db6819ad207d5bd";
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
 const sheetIdHistory = config.sheetIds.history;
-var appLinkOpenMicroApp = `https://applink.feishu.cn/client/mini_program/open?appId=${config.app_id}&mode=window`;
+
+var msgReceiver = config.msgReceiver;
+var appLink = require("../../config.js").appLink;
 
 console.log("-----------------");
 console.log("Loaded config ...");
@@ -428,19 +429,17 @@ Page({
       spots[1]
     ).slice(6, -1);
 
-    cardContent.elements[2].actions[0].url = appLinkOpenMicroApp;
+    cardContent.elements[2].actions[0].url = appLink;
   },
 
   sendSpotsStatusMsg: function () {
     if (config.msgBot) {
       var content = this.spotsStatusMsg();
-      var receiver = {
-        // open_id: app.globalData.open_id,
-        chat_id: chat_id,
-      };
+
       util.logger("spots status msg", content);
+      util.logger("receiver", msgReceiver);
       return ttBot
-        .sendTextMsg(app.globalData.tenant_access_token, content, receiver)
+        .sendTextMsg(app.globalData.tenant_access_token, content, msgReceiver)
         .then((res) => {
           util.logger("Bot msg sended...");
           util.logger("Bot msg res", res);
@@ -451,14 +450,15 @@ Page({
   sendSpotsStatusCard: function () {
     if (config.msgBot) {
       this.spotsStatusCard();
-      var receiver = {
-        // open_id: app.globalData.open_id,
-        chat_id: chat_id,
-      };
       util.logger("spots status card", cardContent);
+      util.logger("receiver", msgReceiver);
 
       return ttBot
-        .sendCardMsg(app.globalData.tenant_access_token, cardContent, receiver)
+        .sendCardMsg(
+          app.globalData.tenant_access_token,
+          cardContent,
+          msgReceiver
+        )
         .then((res) => {
           util.logger("Bot card sended...");
           util.logger("Bot card res", res);
