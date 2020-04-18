@@ -7,7 +7,7 @@ var cardContent = require("./spotsStatusCardContent.js").cardContent;
 
 const config = require("../../config.js").config;
 
-const chat_id = require("../../config.js").chat_id;
+const chat_id = "oc_1f5ac5bd6569328f5db6819ad207d5bd";
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
 const sheetIdHistory = config.sheetIds.history;

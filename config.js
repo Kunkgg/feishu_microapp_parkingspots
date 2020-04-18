@@ -1,6 +1,5 @@
 const sheetToken = "shtcnTNuG88jU9y2Ldfp9ZgjjUb";
 const folderToken = "fldcnQ7Qa7RosZTqvzaHveun0og";
-const chat_id = "oc_1f5ac5bd6569328f5db6819ad207d5bd";
 
 var config = {
   app_id: "cli_9e071c8f77b1d00d",
