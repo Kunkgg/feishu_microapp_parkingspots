@@ -111,6 +111,14 @@ function ttHideToast() {
   return dwPromisify(tt.hideToast)();
 }
 
+function ttScrollTop(scrollTop, duration = 200) {
+  console.log("Page scroll to...");
+  return dwPromisify(tt.pageScrollTo)({
+    scrollTop: scrollTop,
+    duration: duration,
+  });
+}
+
 module.exports = {
   ttLogin: ttLogin,
   ttGetUserInfo: ttGetUserInfo,
@@ -122,4 +130,5 @@ module.exports = {
   ttShowModal: ttShowModal,
   ttShowLoading: ttShowLoading,
   ttHideToast: ttHideToast,
+  ttScrollTop: ttScrollTop,
 };

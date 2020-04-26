@@ -24,6 +24,7 @@ console.log("-----------------");
 const app = getApp();
 
 // TODO: get chat_id by whitelist
+// TODO: show Action in msg title, CarOut or CarIn
 Page({
   onLoad: function () {
     var that = this;
@@ -50,6 +51,13 @@ Page({
       });
     }
   },
+
+  onPullDownRefresh: function () {
+    console.log("onPullDownRefresh", new Date());
+
+    this.onLoad();
+  },
+
   data: {
     // spots: [[id, name, status, lastEditor, lastEditorAvatar, mtime],...]
     // cars: [[id, plate],...]
