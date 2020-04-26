@@ -13,7 +13,7 @@ var config = {
     fake_his: "fyfzjB",
   },
   showLoading: false,
-  msgBot: false,
+  msgBot: true,
   msgReceiver: {
     open_id: "ou_5f8204530f3c01385c20a4babfc09936",
   },

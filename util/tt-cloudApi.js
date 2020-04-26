@@ -336,14 +336,10 @@ function sheetWriteRanges(
   // values: [[v, v, v...], [v, v, v...]]
   // ranges.length should equal vaules_list.length
   var data = { valueRanges: [] };
-  var i;
-  for (i = 0; i < ranges.length; i++) {
+  for (let i = 0; i < ranges.length; i++) {
     data.valueRanges.push({ range: ranges[i], values: valuesList[i] });
   }
   var auth = `Bearer ${access_token}`;
-
-  console.log(JSON.stringify(data));
-  console.log(apiUrl_sheetWriteRanges(sheetToken));
 
   return dwPromisify(tt.request)({
     url: apiUrl_sheetWriteRanges(sheetToken),

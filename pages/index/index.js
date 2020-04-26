@@ -168,25 +168,20 @@ Page({
       });
   },
 
-  updateCloudSpots: function () {
+  updateCloudData: function (hisParams) {
     var that = this;
 
-    // write current spots to cloud
-    ttCloudApi
-      .sheetWriteRange(
-        app.globalData.user_access_token,
-        that.data.ranges.spots,
-        that.data.spots
-      )
-      .then(() => {
-        util.logger("Update spots success", that.data.spots);
-        // reload page after update spots
-        that.onLoad();
+    var ranges = [that.data.ranges.spots, hisParams.rangeHist];
+    var valuesList = [that.data.spots, hisParams.valuesHist];
+
+    return ttCloudApi
+      .sheetWriteRanges(app.globalData.user_access_token, ranges, valuesList)
+      .then((res) => {
+        if (res.data.code == 0) {
+          that.onLoad();
+          that.sendSpotsStatusCard();
+        }
       });
-  },
-
-  updateCloudData: function () {
-    var that = this;
   },
 
   _setSpotUserInfo: function (spot) {
@@ -260,9 +255,14 @@ Page({
     var lastColHist = util.columnCharName(
       sheetMeta.sheets[sheetIndex].columnCount
     );
-    var targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
+    if (spot[6] != 0 && spot[6] != null && spot[6] != "" && spot[6]) {
+      var targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
+      var rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
+    } else {
+      util.logger("Get pop history failed");
+      return "";
+    }
 
-    var rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
     var valuesHist = [[popTime]];
 
     var d = { rangeHist: rangeHist, valuesHist: valuesHist };
@@ -295,29 +295,19 @@ Page({
     }
 
     selectConfirm(prompt_title, prompt_content).then(({ confirm, cancel }) => {
-      var popHisParams = that.makePopHistoryParams(
-        targetIndex,
-        app.globalData.sheetMeta,
-        fake
-      );
-
       if (confirm) {
-        ttCloudApi
-          .sheetWriteRange(
-            app.globalData.user_access_token,
-            popHisParams.rangeHist,
-            popHisParams.valuesHist
-          )
-          .then((res) => {
-            if (res.data.code == 0) {
-              that.setSpots(targetIndex, "", "pop", fake);
-              that.updateCloudSpots();
-              // that.sendSpotsStatusMsg();
-              that.sendSpotsStatusCard();
-              util.logger("carOut successed");
-            }
-            console.log(res.data);
+        var popHisParams = that.makePopHistoryParams(
+          targetIndex,
+          app.globalData.sheetMeta,
+          fake
+        );
+        that.setSpots(targetIndex, "", "pop", fake);
+
+        if (popHisParams != "") {
+          that.updateCloudData(popHisParams).then(() => {
+            util.logger("Updated a carOut infos to cloud");
           });
+        }
       }
       if (cancel) {
         util.logger("carOut canceled");
@@ -345,11 +335,11 @@ Page({
     var lastColHist = util.columnCharName(
       sheetMeta.sheets[sheetIndex].columnCount
     );
-    var lastRowHist = sheetMeta.sheets[sheetIndex].rowCount;
+    var lastRowHist = sheetMeta.sheets[sheetIndex].rowCount + 1;
     var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
 
     var valuesHist = [
-      [lastRowHist, this.data.spots[targetIndex][1], plate, pushTime],
+      [lastRowHist - 1, this.data.spots[targetIndex][1], plate, pushTime],
     ];
 
     var d = { rangeHist: rangeHist, valuesHist: valuesHist };
@@ -389,25 +379,11 @@ Page({
           plate,
           fake
         );
+        that.setSpots(targetIndex, plate, "push", fake);
 
-        ttCloudApi
-          .sheetAppendData(
-            app.globalData.user_access_token,
-            pushHisParams.rangeHist,
-            pushHisParams.valuesHist
-          )
-          .then((res) => {
-            if (res.data.code == 0) {
-              console.log("Created a new history item");
-              console.log(res.data);
-              that.setSpots(targetIndex, plate, "push", fake);
-            }
-          })
-          .then(() => {
-            that.updateCloudSpots();
-            that.sendSpotsStatusCard();
-            // that.sendSpotsStatusMsg();
-          });
+        that.updateCloudData(pushHisParams).then(() => {
+          util.logger("Updated a carIn infos to cloud");
+        });
       }
     );
   },

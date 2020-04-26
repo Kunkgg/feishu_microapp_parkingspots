@@ -18,8 +18,6 @@ var sheetIdHistory = config.sheetIds.history;
 // TODO: msg bot, improve msg card
 // TODO: change the method of computing total time for usage rate
 // TODO: introduce of usage
-// TODO: combine the network requests of record history
-// TODO: deal with the border statustion of create history
 // TODO: change color of tab icon
 // TODO: auto generate fake data
 // TODO: refactor
