@@ -72,6 +72,16 @@ function columnCharName(n) {
   return String.fromCharCode(64 + n);
 }
 
+function sheetIndexById(sheetMeta, sheetId) {
+  // get the index of sub sheet from the sheetMeta
+  const sheets = sheetMeta.sheets;
+  for (let i = 0; i < sheetMeta.sheets.length; i++) {
+    if (sheets[i].sheetId == sheetId) {
+      return i;
+    }
+  }
+}
+
 function sum(input) {
   if (toString.call(input) !== "[object Array]") return false;
 
@@ -115,6 +125,7 @@ module.exports = {
   shortTimeString,
   shortTimeString,
   columnCharName: columnCharName,
+  sheetIndexById: sheetIndexById,
   logger: logger,
   sum: sum,
   fixLengthString: fixLengthString,

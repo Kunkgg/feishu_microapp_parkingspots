@@ -9,7 +9,8 @@ const config = require("../../config.js").config;
 
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
-const sheetIdHistory = config.sheetIds.history;
+const sheetIdFakeHistory = config.sheetIds.fake_his;
+var sheetIdHistory = config.sheetIds.history;
 
 var msgReceiver = config.msgReceiver;
 var appLink = require("../../config.js").appLink;
@@ -189,8 +190,11 @@ Page({
   },
 
   _setSpotHistory: function (spot, hisAction) {
+    var sheetMeta = app.globalData.sheetMeta;
+    var sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
+
     if (hisAction == "push") {
-      spot[6] = app.globalData.sheetMeta.sheets[2].rowCount;
+      spot[6] = sheetMeta.sheets[sheetIndex].rowCount;
     } else if (hisAction == "pop") {
       spot[6] = "";
     }
@@ -223,16 +227,23 @@ Page({
   },
 
   makePopHistoryParams: function (targetIndex, sheetMeta, fake = false) {
+    if (fake) {
+      var popTime = this.fakeDateTime();
+      sheetIdHistory = sheetIdFakeHistory;
+    } else {
+      var popTime = util.dateTimeString();
+      sheetIdHistory = config.sheetIds.history;
+    }
+
+    var sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
+
     var spot = this.data.spots[targetIndex];
-    var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
+    var lastColHist = util.columnCharName(
+      sheetMeta.sheets[sheetIndex].columnCount
+    );
     var targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
 
     var rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
-    if (fake) {
-      var popTime = this.fakeDateTime();
-    } else {
-      var popTime = util.dateTimeString();
-    }
     var valuesHist = [[popTime]];
 
     var d = { rangeHist: rangeHist, valuesHist: valuesHist };
@@ -301,16 +312,22 @@ Page({
     plate,
     fake = false
   ) {
-    // make history sheet range
-    var lastColHist = util.columnCharName(sheetMeta.sheets[2].columnCount);
-    var lastRowHist = sheetMeta.sheets[2].rowCount;
-    var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
-
     if (fake) {
       var pushTime = this.fakeDateTime();
+      sheetIdHistory = sheetIdFakeHistory;
     } else {
       var pushTime = util.dateTimeString();
+      sheetIdHistory = config.sheetIds.history;
     }
+
+    var sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
+
+    // make history sheet range
+    var lastColHist = util.columnCharName(
+      sheetMeta.sheets[sheetIndex].columnCount
+    );
+    var lastRowHist = sheetMeta.sheets[sheetIndex].rowCount;
+    var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
 
     var valuesHist = [
       [lastRowHist, this.data.spots[targetIndex][1], plate, pushTime],
