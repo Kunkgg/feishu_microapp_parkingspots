@@ -18,12 +18,10 @@ var sheetIdHistory = config.sheetIds.history;
 // TODO: msg bot, improve msg card
 // TODO: change the method of computing total time for usage rate
 // TODO: introduce of usage
-// TODO: hide fake buttons in default
 // TODO: combine the network requests of record history
 // TODO: deal with the border statustion of create history
-// TODO: improve clearData method
 // TODO: change color of tab icon
-// TODO: fix generate fake data des sheet
+// TODO: auto generate fake data
 // TODO: refactor
 // TODO: display the method of useage rate
 // TODO: in18

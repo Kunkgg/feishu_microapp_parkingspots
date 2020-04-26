@@ -92,13 +92,24 @@ Page({
         var sheetMeta = res.data.data;
 
         // make spots and cars sheet range
-        var lastColSpots = util.columnCharName(sheetMeta.sheets[0].columnCount);
-        var lastRowSpots = sheetMeta.sheets[0].rowCount;
-        var lastColCars = util.columnCharName(sheetMeta.sheets[1].columnCount);
-        var lastRowCars = sheetMeta.sheets[1].rowCount;
+        var sheetIndexSpots = util.sheetIndexById(sheetMeta, sheetIdSpots);
+        var lastColSpots = util.columnCharName(
+          sheetMeta.sheets[sheetIndexSpots].columnCount
+        );
+        var lastRowSpots = sheetMeta.sheets[sheetIndexSpots].rowCount;
+
+        var sheetIndexCars = util.sheetIndexById(sheetMeta, sheetIdCars);
+        var lastColCars = util.columnCharName(
+          sheetMeta.sheets[sheetIndexCars].columnCount
+        );
+        var lastRowCars = sheetMeta.sheets[sheetIndexCars].rowCount;
+
         var rangeSpots = `${sheetIdSpots}!A2:${lastColSpots}${lastRowSpots}`;
         var rangeCars = `${sheetIdCars}!A2:${lastColCars}${lastRowCars}`;
-        var ranges = [rangeSpots, rangeCars];
+        var ranges = {
+          spots: rangeSpots,
+          cars: rangeCars,
+        };
 
         that.setData({
           ranges: ranges,
@@ -118,10 +129,14 @@ Page({
     that
       .loadSheetMeta()
       .then(() => {
+        var rangesSpotsAndCars = [
+          that.data.ranges.spots,
+          that.data.ranges.cars,
+        ];
         // load data from cloud
         return ttCloudApi.sheetReadRanges(
           app.globalData.user_access_token,
-          that.data.ranges
+          rangesSpotsAndCars
         );
       })
       .then((res) => {
@@ -160,7 +175,7 @@ Page({
     ttCloudApi
       .sheetWriteRange(
         app.globalData.user_access_token,
-        that.data.ranges[0],
+        that.data.ranges.spots,
         that.data.spots
       )
       .then(() => {
@@ -168,6 +183,10 @@ Page({
         // reload page after update spots
         that.onLoad();
       });
+  },
+
+  updateCloudData: function () {
+    var that = this;
   },
 
   _setSpotUserInfo: function (spot) {
