@@ -59,15 +59,17 @@ Page({
     console.log("onPullDownRefresh", new Date());
 
     this.onLoad();
+    ttClientApi.ttStopPullDownRefresh();
   },
 
   data: {
     // history:     array
     // title:       string
     // usageRate:   object
-    title: "建衡技术车位使用率统计",
+    // title: "建衡技术车位使用率统计",
     spotnames: app.globalData.spotnames,
     plates: app.globalData.plates,
+    fakeMode: config.fakeMode,
   },
 
   loadSheetMeta: function () {

@@ -119,6 +119,19 @@ function ttScrollTop(scrollTop, duration = 200) {
   });
 }
 
+function ttStartPullDownRefresh() {
+  console.log("Start pull down refresh...");
+  return dwPromisify(tt.startPullDownRefresh)();
+}
+
+function ttStopPullDownRefresh(
+  fn = () => {
+    console.log("Stoped pull down refresh");
+  }
+) {
+  return dwPromisify(tt.stopPullDownRefresh)({ complete: fn });
+}
+
 module.exports = {
   ttLogin: ttLogin,
   ttGetUserInfo: ttGetUserInfo,
@@ -131,4 +144,6 @@ module.exports = {
   ttShowLoading: ttShowLoading,
   ttHideToast: ttHideToast,
   ttScrollTop: ttScrollTop,
+  ttStartPullDownRefresh: ttStartPullDownRefresh,
+  ttStopPullDownRefresh: ttStopPullDownRefresh,
 };

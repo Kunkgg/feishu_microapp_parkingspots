@@ -56,6 +56,7 @@ Page({
     console.log("onPullDownRefresh", new Date());
 
     this.onLoad();
+    ttClientApi.ttStopPullDownRefresh();
   },
 
   data: {
@@ -64,8 +65,8 @@ Page({
     // plates: [plate1, plate2, ...]
     // fakeMode:    bool
     // title:       string
+    // title: "建衡技术车位信息共享",
     fakeMode: config.fakeMode,
-    title: "建衡技术车位信息共享",
   },
 
   loadUserInfo: function () {

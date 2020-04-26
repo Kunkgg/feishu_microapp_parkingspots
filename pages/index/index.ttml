@@ -1,18 +1,17 @@
 <import src="spotCard.ttml"/>
 
-<view class="contain">
-    <view class="header">{{title}}</view>
+<!-- <view class="contain"> -->
+<!--     <view class="header">{{title}}</view> -->
+<!-- </view> -->
+
+<view tt:if="{{ fakeMode }}" class="container" style="flex-direction: row;">
+    <button type="primary" bindtap="fakeData">FakeData</button>
+    <button type="primary" bindtap="fakeCarIn">FakeCarIn</button>
+    <button type="primary" bindtap="fakeCarOut">FakeCarOut</button>
 </view>
 
 <view class="container">
     <block tt:for="{{spots}}">
         <template is="spotCard" data="{{item}}"/>
     </block>
-</view>
-
-<!-- <view tt:if="{{fakeMode == true}}" class="container" style="flex-direction: row;"> -->
-<view tt:if="{{ false }}" class="container" style="flex-direction: row;">
-    <button type="primary" bindtap="fakeData">FakeData</button>
-    <button type="primary" bindtap="fakeCarIn">FakeCarIn</button>
-    <button type="primary" bindtap="fakeCarOut">FakeCarOut</button>
 </view>
