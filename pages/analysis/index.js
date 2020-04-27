@@ -94,7 +94,7 @@ Page({
         }
 
         that.setData({
-          range: rangeHist,
+          rangeHist: rangeHist,
         });
 
         app.globalData.hasSheetMeta = true;
@@ -121,11 +121,11 @@ Page({
     that
       .loadSheetMeta()
       .then(() => {
-        if (that.data.range != "") {
+        if (that.data.rangeHist != "") {
           // load history data from cloud
           return ttCloudApi.sheetReadRange(
             app.globalData.user_access_token,
-            that.data.range
+            that.data.rangeHist
           );
         } else {
           var p = new Promise((resolve) => {
