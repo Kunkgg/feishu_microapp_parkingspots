@@ -15,13 +15,11 @@ const sheetIds = {
 
 var sheetIdHistory = config.sheetIds.history;
 
-// TODO: msg bot, improve msg card
-// TODO: change the method of computing total time for usage rate
-// TODO: introduce of usage
-// TODO: change color of tab icon
-// TODO: auto generate fake data
 // TODO: refactor
+// TODO: change the method of computing total time for usage rate
+// TODO: auto generate fake data
 // TODO: display the method of useage rate
+// TODO: introduce of usage
 // TODO: in18
 
 const app = getApp();

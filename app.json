@@ -8,22 +8,22 @@
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#ed4040",
+    "color": "#979797",
+    "selectedColor": "#fefefe",
     "borderStyle": "black",
-    "backgroundColor": "#151515",
+    "backgroundColor": "#000",
     "list": [
       {
         "pagePath": "pages/index/index",
         "iconPath": "images/icon_status.png",
         "selectedIconPath": "images/icon_status_HL.png",
-        "text": "Status"
+        "text": "状态"
       },
       {
         "pagePath": "pages/analysis/index",
         "iconPath": "images/icon_analysis.png",
         "selectedIconPath": "images/icon_analysis_HL.png",
-        "text": "statistics"
+        "text": "统计"
       }
     ]
   },
