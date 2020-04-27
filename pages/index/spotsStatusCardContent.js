@@ -1,3 +1,5 @@
+var appLink = require("../../config.js").appLink;
+
 var cardContent = {
   config: {
     wide_screen_mode: true,
@@ -57,7 +59,7 @@ var cardContent = {
             content: "进入小程序",
           },
           type: "default",
-          url: "",
+          url: appLink,
         },
       ],
     },

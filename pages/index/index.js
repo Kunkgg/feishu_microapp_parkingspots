@@ -13,7 +13,6 @@ const sheetIdFakeHistory = config.sheetIds.fake_his;
 var sheetIdHistory = config.sheetIds.history;
 
 var msgReceiver = config.msgReceiver;
-var appLink = require("../../config.js").appLink;
 
 console.log("-----------------");
 console.log("Loaded config ...");
@@ -449,8 +448,6 @@ Page({
     cardContent.elements[1].fields[0].text.content = this._formatSpotStatus(
       spots[1]
     ).slice(6, -1);
-
-    cardContent.elements[2].actions[0].url = appLink;
   },
 
   sendSpotsStatusMsg: function () {
