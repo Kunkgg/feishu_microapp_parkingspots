@@ -11,11 +11,11 @@ var config = {
     empty_his: "m1JeYR",
     fake_his: "fyfzjB",
   },
-  fakeMode: false,
+  fakeMode: true,
   showLoading: true,
   msgBot: true,
   msgReceiver: {
-    open_id: "ou_5f8204530f3c01385c20a4babfc09936",
+  open_id: "ou_5f8204530f3c01385c20a4babfc09936",
   },
 };
 

@@ -155,7 +155,7 @@ Page({
   },
 
   cleanHistoryData: function (history) {
-    // clean the history items, reserve the completed history items
+    // clean the history items, reserve the completed history items only
     return history.filter((x) => x[3] && x[4]);
   },
 
@@ -176,11 +176,21 @@ Page({
     var endRangeTime =
       todayDate.getTime() - 3600 * 24 * 1000 * (daysRange[0] - 1) - 1000;
 
-    function stayTime(inTimeString, outTimeString, endRangeTime) {
+    function stayTime(
+      inTimeString,
+      outTimeString,
+      startRangeTime,
+      endRangeTime
+    ) {
       var inTime = new Date(inTimeString);
       var outTime = new Date(outTimeString);
 
-      inTime = inTime.getTime();
+      if (inTime.getTime() < startRangeTime) {
+        inTime = startRangeTime;
+      } else {
+        inTime = inTime.getTime();
+      }
+
       if (outTime.getTime() > endRangeTime) {
         outTime = endRangeTime;
       } else {
@@ -191,19 +201,23 @@ Page({
     }
 
     var targetHisList = that.data.history.filter((x) => {
-      var d = new Date(x[3]);
+      var d1 = new Date(x[3]);
+      var d2 = new Date(x[4]);
 
       return (
-        d.getTime() >= startRangeTime &&
-        d.getTime() <= endRangeTime &&
+        d1.getTime() <= endRangeTime &&
+        d2.getTime() >= startRangeTime &&
         spots.includes(x[1]) &&
         plates.includes(x[2])
       );
     });
 
     var stayTimeSum = Math.floor(
-      util.sum(targetHisList.map((x) => stayTime(x[3], x[4], endRangeTime))) /
-        1000
+      util.sum(
+        targetHisList.map((x) =>
+          stayTime(x[3], x[4], startRangeTime, endRangeTime)
+        )
+      ) / 1000
     );
 
     if (spots.length == 0) {
