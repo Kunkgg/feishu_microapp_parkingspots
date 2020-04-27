@@ -3,7 +3,10 @@ const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const ttBot = require("../../util/tt-msgbot");
 const util = require("../../util/util.js");
-var cardContent = require("./spotsStatusCardContent.js").cardContent;
+var cardContentTemp = require("./spotsStatusCardContent.js").cardContent;
+var cardSpotTemp = require("./spotsStatusCardContent.js").spot;
+var cardMoveInfoTemp = require("./spotsStatusCardContent.js").moveInfo;
+const cardHr = require("./spotsStatusCardContent.js").hr;
 
 const config = require("../../config.js").config;
 
@@ -24,7 +27,6 @@ console.log("-----------------");
 const app = getApp();
 
 // TODO: get chat_id by whitelist
-// TODO: show Action in msg title, CarOut or CarIn
 Page({
   onLoad: function () {
     var that = this;
@@ -167,7 +169,7 @@ Page({
       });
   },
 
-  updateCloudData: function (hisParams) {
+  updateCloudData: function (hisParams, moveInfo) {
     var that = this;
 
     var ranges = [that.data.ranges.spots, hisParams.rangeHist];
@@ -178,7 +180,7 @@ Page({
       .then((res) => {
         if (res.data.code == 0) {
           that.onLoad();
-          that.sendSpotsStatusCard();
+          that.sendSpotsStatusCard(moveInfo);
         }
       });
   },
@@ -284,6 +286,7 @@ Page({
     var spot = spots[targetIndex];
     var prompt_title = "确认提示";
     var prompt_content = `将牌照 ${spot[2]} 车辆移出车位 ${spot[1]} ?`;
+
     console.log("Here is carOut...");
     console.log(`targetIndex: ${targetIndex}`);
 
@@ -300,10 +303,12 @@ Page({
           app.globalData.sheetMeta,
           fake
         );
+
+        var moveInfo = `刚刚将牌照 ${spot[2]} 车辆**移出**车位 ${spot[1]}`;
         that.setSpots(targetIndex, "", "pop", fake);
 
         if (popHisParams != "") {
-          that.updateCloudData(popHisParams).then(() => {
+          that.updateCloudData(popHisParams, moveInfo).then(() => {
             util.logger("Updated a carOut infos to cloud");
           });
         }
@@ -360,6 +365,7 @@ Page({
   carIn: function (targetIndex, fake = false) {
     var that = this;
     var unUsedPlates = this.unUsedPlates();
+
     console.log("Here is carIn...");
     console.log(`targetIndex: ${targetIndex}`);
 
@@ -380,7 +386,9 @@ Page({
         );
         that.setSpots(targetIndex, plate, "push", fake);
 
-        that.updateCloudData(pushHisParams).then(() => {
+        var moveInfo = `刚刚将牌照 ${plate} 车辆**移入**车位 ${that.data.spots[targetIndex][1]}`;
+
+        that.updateCloudData(pushHisParams, moveInfo).then(() => {
           util.logger("Updated a carIn infos to cloud");
         });
       }
@@ -404,7 +412,6 @@ Page({
     var plateCase = "xAFxxxxx";
     var mtimeCase = "20/04/17 08:05";
     var lastEditorCase = "王大壮士";
-    var spotName = spot[1];
     var spotStatus = "";
     var lastEditor = "";
     var mtime = "";
@@ -426,48 +433,31 @@ Page({
       mtime = util.fixLengthString(mtime, mtimeCase.length);
     }
 
-    return `${spotName} | ${spotStatus} | ${lastEditor} | ${mtime}`;
+    return `${spotStatus} | ${lastEditor} | ${mtime}`;
   },
 
-  spotsStatusMsg: function () {
-    var msgHeader = "车位状态更新提示:\n";
-    var msgBody = "";
-    this.data.spots.forEach((x) => {
-      msgBody = msgBody + this._formatSpotStatus(x) + "\n";
-    });
-
-    return msgHeader + msgBody;
-    // return msgBody;
-  },
-
-  spotsStatusCard: function () {
+  spotsStatusCard: function (moveInfo) {
     var spots = this.data.spots;
-    cardContent.elements[0].fields[0].text.content = this._formatSpotStatus(
-      spots[0]
-    ).slice(6, -1);
-    cardContent.elements[1].fields[0].text.content = this._formatSpotStatus(
-      spots[1]
-    ).slice(6, -1);
-  },
 
-  sendSpotsStatusMsg: function () {
-    if (config.msgBot) {
-      var content = this.spotsStatusMsg();
+    var cardContent = JSON.parse(JSON.stringify(cardContentTemp));
+    var cardMoveInfo = JSON.parse(JSON.stringify(cardMoveInfoTemp));
+    cardMoveInfo.text.content = moveInfo;
 
-      util.logger("spots status msg", content);
-      util.logger("receiver", msgReceiver);
-      return ttBot
-        .sendTextMsg(app.globalData.tenant_access_token, content, msgReceiver)
-        .then((res) => {
-          util.logger("Bot msg sended...");
-          util.logger("Bot msg res", res);
-        });
+    for (let i = spots.length - 1; i >= 0; i--) {
+      var cardSpot = JSON.parse(JSON.stringify(cardSpotTemp));
+      cardSpot.text.content = `**${spots[i][1]}**`;
+      cardSpot.fields[0].text.content = this._formatSpotStatus(spots[i]);
+      cardContent.elements.unshift(cardSpot);
     }
+    cardContent.elements.unshift(cardHr);
+    cardContent.elements.unshift(cardMoveInfo);
+
+    return cardContent;
   },
 
-  sendSpotsStatusCard: function () {
+  sendSpotsStatusCard: function (moveInfo) {
     if (config.msgBot) {
-      this.spotsStatusCard();
+      var cardContent = this.spotsStatusCard(moveInfo);
       util.logger("spots status card", cardContent);
       util.logger("receiver", msgReceiver);
 
@@ -483,6 +473,7 @@ Page({
         });
     }
   },
+
   fake: {
     costTime: 5 * 60,
     counter: 0,

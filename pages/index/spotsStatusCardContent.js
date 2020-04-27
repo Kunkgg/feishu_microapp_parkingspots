@@ -18,38 +18,6 @@ var cardContent = {
   },
   elements: [
     {
-      tag: "div",
-      text: {
-        tag: "lark_md",
-        content: "**D-101**",
-      },
-      fields: [
-        {
-          is_short: true,
-          text: {
-            tag: "plain_text",
-            content: "",
-          },
-        },
-      ],
-    },
-    {
-      tag: "div",
-      text: {
-        tag: "lark_md",
-        content: "**D-100**",
-      },
-      fields: [
-        {
-          is_short: true,
-          text: {
-            tag: "plain_text",
-            content: "",
-          },
-        },
-      ],
-    },
-    {
       tag: "action",
       actions: [
         {
@@ -58,7 +26,7 @@ var cardContent = {
             tag: "plain_text",
             content: "进入小程序",
           },
-          type: "default",
+          type: "primary",
           url: appLink,
         },
       ],
@@ -66,6 +34,38 @@ var cardContent = {
   ],
 };
 
+var spot = {
+  tag: "div",
+  text: {
+    tag: "lark_md",
+    content: "",
+  },
+  fields: [
+    {
+      is_short: true,
+      text: {
+        tag: "plain_text",
+        content: "",
+      },
+    },
+  ],
+};
+
+const hr = {
+  tag: "hr",
+};
+
+var moveInfo = {
+  tag: "div",
+  text: {
+    tag: "lark_md",
+    content: "",
+  },
+};
+
 module.exports = {
   cardContent: cardContent,
+  spot: spot,
+  hr: hr,
+  moveInfo: moveInfo,
 };
