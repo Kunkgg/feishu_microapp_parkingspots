@@ -30,6 +30,8 @@
 
 source ./token
 
+function _init(){
+
 cat >./config.js <<EOF
 const sheetToken = "<sheetToken>";
 const folderToken = "<folderToken>";
@@ -61,6 +63,7 @@ module.exports = {
   appLink: appLink,
 };
 EOF
+}
 
 function _test(){
     sheetToken="${test_sheetToken}"
@@ -91,6 +94,8 @@ function _deploy(){
 }
 
 function _config(){
+    _init
+
     sed -i "s/<app_id>/${app_id}/" config.js
     sed -i "s/<app_secret>/${app_secret}/" config.js
     sed -i "s/<sheetToken>/${sheetToken}/" config.js
