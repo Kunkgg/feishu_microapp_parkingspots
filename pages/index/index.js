@@ -79,7 +79,7 @@ Page({
       ttClientApi.ttGetUserInfo().then((res) => {
         app.globalData.hasUserInfo = true;
         app.globalData.userInfo = res.userInfo;
-        util.logger("Loaded userInfo Success");
+        util.logger("Loaded userInfo Success", app.globalData.userInfo);
       });
     }
   },
@@ -286,6 +286,7 @@ Page({
     var spot = spots[targetIndex];
     var prompt_title = "确认提示";
     var prompt_content = `将牌照 ${spot[2]} 车辆移出车位 ${spot[1]} ?`;
+    var userInfo = app.globalData.userInfo;
 
     console.log("Here is carOut...");
     console.log(`targetIndex: ${targetIndex}`);
@@ -304,7 +305,7 @@ Page({
           fake
         );
 
-        var moveInfo = `刚刚将牌照 ${spot[2]} 车辆**移出**车位 ${spot[1]}`;
+        var moveInfo = `${userInfo.nickName}刚刚将牌照 [${spot[2]}] 车辆**移出**车位 [${spot[1]}]`;
         that.setSpots(targetIndex, "", "pop", fake);
 
         if (popHisParams != "") {
@@ -364,40 +365,50 @@ Page({
 
   carIn: function (targetIndex, fake = false) {
     var that = this;
-    var unUsedPlates = this.unUsedPlates();
-
-    console.log("Here is carIn...");
-    console.log(`targetIndex: ${targetIndex}`);
-
-    if (fake) {
-      var selectPlate = that.randomPlateIndex;
-    } else {
-      var selectPlate = ttClientApi.ttShowActionSheet;
-    }
-
-    Promise.all([selectPlate(unUsedPlates), that.loadSheetMeta()]).then(
-      ([res, _]) => {
-        var plate = unUsedPlates[res.tapIndex];
-        var pushHisParams = that.makePushHistoryParams(
-          targetIndex,
-          app.globalData.sheetMeta,
-          plate,
-          fake
-        );
-        that.setSpots(targetIndex, plate, "push", fake);
-
-        var moveInfo = `刚刚将牌照 ${plate} 车辆**移入**车位 ${that.data.spots[targetIndex][1]}`;
-
-        that.updateCloudData(pushHisParams, moveInfo).then(() => {
-          util.logger("Updated a carIn infos to cloud");
+    var unUsedPlates = that.unUsedPlates();
+    if (unUsedPlates.length == 0) {
+      ttClientApi
+        .ttShowModal("提示", "没有可用的车牌", "确定", "取消", false)
+        .then(() => {
+          util.logger("Don't have any unUsed plates");
+          return;
         });
+    } else {
+      var userInfo = app.globalData.userInfo;
+
+      console.log("Here is carIn...");
+      console.log(`targetIndex: ${targetIndex}`);
+
+      if (fake) {
+        var selectPlate = that.randomPlateIndex;
+      } else {
+        var selectPlate = ttClientApi.ttShowActionSheet;
       }
-    );
+
+      Promise.all([selectPlate(unUsedPlates), that.loadSheetMeta()]).then(
+        ([res, _]) => {
+          var plate = unUsedPlates[res.tapIndex];
+          var pushHisParams = that.makePushHistoryParams(
+            targetIndex,
+            app.globalData.sheetMeta,
+            plate,
+            fake
+          );
+          that.setSpots(targetIndex, plate, "push", fake);
+
+          var moveInfo = `${userInfo.nickName}刚刚将牌照 [${plate}] 车辆**移入**车位 [${that.data.spots[targetIndex][1]}]`;
+
+          that.updateCloudData(pushHisParams, moveInfo).then(() => {
+            util.logger("Updated a carIn infos to cloud");
+          });
+        }
+      );
+    }
   },
 
   carMove: function (e) {
     var that = this;
-    var targetIndex = e.currentTarget.id[1] - 1;
+    var targetIndex = e.currentTarget.id.slice(1) - 1;
     var spots = that.data.spots;
     console.log(`targetIndex: ${targetIndex}`);
 

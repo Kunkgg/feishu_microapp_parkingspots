@@ -37,7 +37,6 @@ const folderToken = "<folderToken>";
 var config = {
   app_id: "<app_id>",
   app_secret: "<app_secret>",
-  fakeMode: true,
   sheetIds: {
     spots: "<sheetIdSpots>",
     cars: "<sheetIdCars>",
@@ -45,6 +44,7 @@ var config = {
     empty_his: "<sheetIdEmptyHist>",
     fake_his: "<sheetIdFakeHist>",
   },
+  fakeMode: true,
   showLoading: true,
   msgBot: true,
   msgReceiver: {
