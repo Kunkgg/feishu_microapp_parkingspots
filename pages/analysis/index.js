@@ -405,7 +405,7 @@ Page({
     var currentDataIndex = last12MonthlineChart.getCurrentDataIndex(e);
     console.log(last12MonthlineChart.getCurrentDataIndex(e));
     last12MonthlineChart.showToolTip(e, {
-      // background: '#7cb5ec',
+      mutiLineMode: true,
       format: function () {
         // return category + " " + item.name + ":" + item.data;
         // var info = `${category}

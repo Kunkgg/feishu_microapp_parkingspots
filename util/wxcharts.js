@@ -373,14 +373,23 @@ function getToolTipData(seriesData, calPoints, index, categories) {
   var option =
     arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
 
-  var textList = seriesData.map(function (item) {
-    return {
-      text: option.format
-        ? option.format(item, categories[index])
-        : item.name + ": " + item.data,
-      color: item.color,
-    };
-  });
+  // for display muti-lines touch msg in lineChart
+  if (option.mutiLineMode) {
+    var textList = option.format().map(function (item) {
+      return {
+        text: item,
+      };
+    });
+  } else {
+    var textList = seriesData.map(function (item) {
+      return {
+        text: option.format
+          ? option.format(item, categories[index])
+          : item.name + ": " + item.data,
+        color: item.color,
+      };
+    });
+  }
   var validCalPoints = [];
   var offset = {
     x: 0,
