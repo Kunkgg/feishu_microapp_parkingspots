@@ -15,7 +15,7 @@ const sheetIds = {
 
 var sheetIdHistory = config.sheetIds.history;
 
-const mSecondsOneDay = 3600 * 24 * 1000;
+const millSecOneDay = 3600 * 24 * 1000;
 
 // TODO: refactor
 // TODO: change the method of computing total time for usage rate
@@ -174,10 +174,10 @@ Page({
     var todayDateString = util.dateString();
     var todayDate = new Date(todayDateString);
 
-    var startRangeTime = todayDate.getTime() - mSecondsOneDay * daysRange[1];
+    var startRangeTime = todayDate.getTime() - millSecOneDay * daysRange[1];
 
     var endRangeTime =
-      todayDate.getTime() - mSecondsOneDay * (daysRange[0] - 1) - 1000;
+      todayDate.getTime() - millSecOneDay * (daysRange[0] - 1) - 1000;
 
     function stayTime(
       inTimeString,
@@ -220,7 +220,7 @@ Page({
     }
 
     var totalTime =
-      (daysRange[1] - daysRange[0] + 1) * mSecondsOneDay * spots.length;
+      (daysRange[1] - daysRange[0] + 1) * millSecOneDay * spots.length;
 
     return {
       ur: stayTimeSum / totalTime,
@@ -287,7 +287,7 @@ Page({
       },
       background: "#f5f6f7",
       title: {
-        name: `${usedPercent}%`,
+        name: util.formatPercent(ur),
         // blue
         color: "#3370ff",
         fontSize: 18,
@@ -352,12 +352,15 @@ Page({
         var targetMonthEnd = new Date(yEnd, mEnd);
         targetMonthEnd = targetMonthEnd.getTime() - 1000;
 
-        var rangeStart = Math.floor((today - targetMonthEnd) / mSecondsOneDay);
-        var rangeEnd = Math.floor((today - targetMonthStart) / mSecondsOneDay);
+        var rangeStart = Math.floor((today - targetMonthEnd) / millSecOneDay);
+        var rangeEnd = Math.floor((today - targetMonthStart) / millSecOneDay);
 
         var start = new Date(targetMonthStart);
         var range = [rangeStart, rangeEnd];
-        var monthString = `${start.getFullYear()}-${start.getMonth() + 1}`;
+        var yString = start.getFullYear().toString();
+        var mString = (start.getMonth() + 1).toString();
+        var mString = mString[1] ? mString : "0" + mString;
+        var monthString = `${yString}-${mString}`;
         var rangeDesc = { range: range, monthString: monthString };
 
         monthRanges.push(rangeDesc);
@@ -407,14 +410,14 @@ Page({
     last12MonthlineChart.showToolTip(e, {
       mutiLineMode: true,
       format: function () {
-        // return category + " " + item.name + ":" + item.data;
-        // var info = `${category}
-        // 使用率: ${item.data}
-        // 占用时间: ${last12MonthData[currentDataIndex][1].stayTimeSum}`;
         var info = [
           last12MonthData[currentDataIndex][0],
-          `使用率: ${last12MonthData[currentDataIndex][1].ur}`,
-          `占用时间: ${last12MonthData[currentDataIndex][1].stayTimeSum}`,
+          `使用率: ${util.formatPercent(
+            last12MonthData[currentDataIndex][1].ur
+          )}`,
+          `占用时间: ${util.formatTimeZH(
+            Math.floor(last12MonthData[currentDataIndex][1].stayTimeSum / 1000)
+          )}`,
         ];
         console.log(info);
         return info;
@@ -440,7 +443,7 @@ Page({
           name: "月份",
           data: formatedData.data,
           format: function (val, name) {
-            return (val * 100).toFixed(2) + "%";
+            return util.formatPercent(val);
           },
           color: "#3370ff",
         },

@@ -17,6 +17,25 @@ function formatTime(time) {
     .join(":");
 }
 
+function formatTimeZH(time) {
+  if (typeof time !== "number" || time < 0) {
+    return time;
+  }
+
+  var hour = parseInt(time / 3600);
+  time = time % 3600;
+  var minute = parseInt(time / 60);
+  time = time % 60;
+  var second = time;
+
+  var res = [hour, minute, second].map(function (n) {
+    n = n.toString();
+    return n[1] ? n : "0" + n;
+  });
+
+  return `${res[0]}时${res[1]}分${res[2]}秒`;
+}
+
 function formatLocation(longitude, latitude) {
   if (typeof longitude === "string" && typeof latitude === "string") {
     longitude = parseFloat(longitude);
@@ -117,6 +136,11 @@ function shortTimeString(timeString) {
   //e.g. 2017/08/10 23:24:25 -> 17/08/10 23:24
   return timeString.slice(2, timeString.length - 3);
 }
+
+function formatPercent(number) {
+  return `${(number * 100).toFixed(2)}%`;
+}
+
 module.exports = {
   formatTime: formatTime,
   formatLocation: formatLocation,
@@ -129,4 +153,6 @@ module.exports = {
   logger: logger,
   sum: sum,
   fixLengthString: fixLengthString,
+  formatPercent: formatPercent,
+  formatTimeZH: formatTimeZH,
 };
