@@ -1,3 +1,4 @@
+<import src="ringChart.ttml"/>
 <text tt:if="{{ fakeMode }}">测试按钮: </text>
 <view tt:if="{{ fakeMode }}" class="container" style="flex-direction: row;">
   <button type="primary" bindtap="importFake">导入模拟数据</button>
@@ -5,28 +6,10 @@
   <button type="primary" bindtap="realData">显示实际数据</button>
 </view>
 
-<!-- <view class="header">{{ title }}</view> -->
-
 <view class="container">
-  <view class="ring-container">
-    <view class="chart-title">最近 1 天</view>
-    <canvas canvas-id="lastDay" disable-scroll="true" class="canvas"></canvas>
-  </view>
-
-  <view class="ring-container">
-    <view class="chart-title">最近 7 天</view>
-    <canvas canvas-id="lastWeek" disable-scroll="true" class="canvas"></canvas>
-  </view>
-
-  <view class="ring-container">
-    <view class="chart-title">最近 30 天</view>
-    <canvas canvas-id="lastMonth" disable-scroll="true" class="canvas"></canvas>
-  </view>
-
-  <view class="ring-container">
-    <view class="chart-title">最近 365 天</view>
-    <canvas canvas-id="lastYear" disable-scroll="true" class="canvas"></canvas>
-  </view>
+    <block tt:for="{{ringChartRanges}}">
+        <template is="ringChart" data="{{item}}"/>
+    </block>
 </view>
 
 <view class="line-container">

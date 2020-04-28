@@ -1,0 +1,10 @@
+<template name="ringChart">
+  <view class="ring-container">
+    <view class="chart-title">最近 {{ item }} 天</view>
+    <canvas
+      canvas-id="last{{ item }}"
+      disable-scroll="true"
+      class="canvas"
+    ></canvas>
+  </view>
+</template>

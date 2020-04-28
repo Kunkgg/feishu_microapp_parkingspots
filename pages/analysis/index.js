@@ -15,6 +15,8 @@ const sheetIds = {
 
 var sheetIdHistory = config.sheetIds.history;
 
+const mSecondsOneDay = 3600 * 24 * 1000;
+
 // TODO: refactor
 // TODO: change the method of computing total time for usage rate
 // TODO: auto generate fake data
@@ -66,6 +68,7 @@ Page({
     spotnames: app.globalData.spotnames,
     plates: app.globalData.plates,
     fakeMode: config.fakeMode,
+    ringChartRanges: [3, 7, 30, 365],
   },
 
   loadSheetMeta: function () {
@@ -171,10 +174,10 @@ Page({
     var todayDateString = util.dateString();
     var todayDate = new Date(todayDateString);
 
-    var startRangeTime = todayDate.getTime() - 3600 * 24 * 1000 * daysRange[1];
+    var startRangeTime = todayDate.getTime() - mSecondsOneDay * daysRange[1];
 
     var endRangeTime =
-      todayDate.getTime() - 3600 * 24 * 1000 * (daysRange[0] - 1) - 1000;
+      todayDate.getTime() - mSecondsOneDay * (daysRange[0] - 1) - 1000;
 
     function stayTime(
       inTimeString,
@@ -185,17 +188,11 @@ Page({
       var inTime = new Date(inTimeString);
       var outTime = new Date(outTimeString);
 
-      if (inTime.getTime() < startRangeTime) {
-        inTime = startRangeTime;
-      } else {
-        inTime = inTime.getTime();
-      }
+      inTime =
+        inTime.getTime() < startRangeTime ? startRangeTime : inTime.getTime();
 
-      if (outTime.getTime() > endRangeTime) {
-        outTime = endRangeTime;
-      } else {
-        outTime = outTime.getTime();
-      }
+      outTime =
+        outTime.getTime() > endRangeTime ? endRangeTime : outTime.getTime();
 
       return outTime - inTime;
     }
@@ -212,12 +209,10 @@ Page({
       );
     });
 
-    var stayTimeSum = Math.floor(
-      util.sum(
-        targetHisList.map((x) =>
-          stayTime(x[3], x[4], startRangeTime, endRangeTime)
-        )
-      ) / 1000
+    var stayTimeSum = util.sum(
+      targetHisList.map((x) =>
+        stayTime(x[3], x[4], startRangeTime, endRangeTime)
+      )
     );
 
     if (spots.length == 0) {
@@ -225,128 +220,52 @@ Page({
     }
 
     var totalTime =
-      (daysRange[1] - daysRange[0] + 1) * 24 * 3600 * spots.length;
+      (daysRange[1] - daysRange[0] + 1) * mSecondsOneDay * spots.length;
 
-    return stayTimeSum / totalTime;
+    return {
+      ur: stayTimeSum / totalTime,
+      stayTimeSum: stayTimeSum,
+      totalTime: totalTime,
+    };
   },
 
   statistics: function () {
-    var usageRate = {};
+    var that = this;
+    var usageRates = {};
+    var nDaysList = that.data.ringChartRanges;
 
-    this.usageRateLastDay(usageRate);
-    this.usageRateLastWeek(usageRate);
-    this.usageRateLastMonth(usageRate);
-    this.usageRateLastYear(usageRate);
-    this.usageRateLast12Month(usageRate);
-
-    this.setData({
-      usageRate: usageRate,
+    nDaysList.forEach((nDays) => {
+      that.usageRateLastNDays(usageRates, nDays);
     });
+
+    that.usageRateLast12Month(usageRates);
+
+    that.setData({
+      usageRates: usageRates,
+    });
+
+    nDaysList.forEach((nDays) => {
+      var chartId = "last" + nDays.toString();
+
+      that.ringChart(usageRates[chartId].ur, chartId);
+    });
+
+    that.lineChart(usageRates["last12Month"], "last12Month");
   },
 
-  usageRateLastDay: function (usageRate) {
+  usageRateLastNDays: function (usageRates, nDays) {
     var rangeStart = 1;
-    var rangeEnd = 1;
+    var rangeEnd = nDays;
     var timeRange = [rangeStart, rangeEnd];
-    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
+    var usageRateRes = this.usageRate(
+      timeRange,
+      this.data.spotnames,
+      this.data.plates
+    );
     // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
-    usageRate["lastDay"] = ur;
 
-    this.ringChart(ur, "lastDay");
-  },
-  usageRateLastWeek: function (usageRate) {
-    var rangeStart = 1;
-    var rangeEnd = 7;
-    var timeRange = [rangeStart, rangeEnd];
-    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
-    usageRate["lastWeek"] = ur;
-
-    this.ringChart(ur, "lastWeek");
-  },
-  usageRateLastMonth: function (usageRate) {
-    var rangeStart = 1;
-    var rangeEnd = 30;
-    var timeRange = [rangeStart, rangeEnd];
-    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
-    usageRate["lastMonth"] = ur;
-    this.ringChart(ur, "lastMonth");
-  },
-  usageRateLastYear: function (usageRate) {
-    var rangeStart = 1;
-    var rangeEnd = 365;
-    var timeRange = [rangeStart, rangeEnd];
-    var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-    // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
-    usageRate["lastYear"] = ur;
-    this.ringChart(ur, "lastYear");
-  },
-
-  usageRateLast12Month: function (usageRate) {
-    var monthRanges = [];
-    var last12Month = [];
-
-    for (var i = 0; i < 12; i++) {
-      var now = new Date();
-      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      today = today.getTime();
-      var targetMonthDistance = i + 1;
-      // notice Date().getMonth() start from 0
-      // realmonth = Date().getMonth() + 1
-
-      if (now.getMonth() < targetMonthDistance) {
-        var y = now.getFullYear() - 1;
-        var m = now.getMonth() - targetMonthDistance + 12;
-        var mEnd = m + 1;
-        var yEnd = y;
-        if (mEnd > 11) {
-          mEnd = 0;
-          yEnd = y + 1;
-        }
-      } else {
-        var y = now.getFullYear();
-        var m = now.getMonth() - targetMonthDistance;
-        var yEnd = y;
-        var mEnd = m + 1;
-      }
-      var targetMonthStart = new Date(y, m);
-      targetMonthStart = targetMonthStart.getTime();
-      var targetMonthEnd = new Date(yEnd, mEnd);
-      targetMonthEnd = targetMonthEnd.getTime() - 1000;
-
-      var rangeStart = Math.floor(
-        (today - targetMonthEnd) / (3600 * 24 * 1000)
-      );
-      var rangeEnd = Math.floor(
-        (today - targetMonthStart) / (3600 * 24 * 1000)
-      );
-
-      var start = new Date(targetMonthStart);
-      var range = [rangeStart, rangeEnd];
-      var monthString = `${start.getFullYear()}-${start.getMonth() + 1}`;
-      var rangeDesc = { range: range, monthString: monthString };
-
-      monthRanges.push(rangeDesc);
-
-      // var end = new Date(targetMonthEnd);
-      // console.log(`range last ${i + 1} month`);
-      // console.log(range);
-      // console.log(util.dateTimeString(start));
-      // console.log(util.dateTimeString(end));
-    }
-
-    for (var i = 0; i < monthRanges.length; i++) {
-      var timeRange = monthRanges[i].range;
-      var ur = this.usageRate(timeRange, this.data.spotnames, this.data.plates);
-      last12Month.push([monthRanges[i].monthString, ur]);
-      // util.logger(`last ${i + 1} monthString`, monthRanges[i].monthString);
-      // util.logger(`last ${i + 1} month`, ur);
-    }
-
-    usageRate[last12Month] = last12Month;
-
-    this.lineChart(last12Month, "last12Month");
+    var chartId = "last" + nDays.toString();
+    usageRates[chartId] = usageRateRes;
   },
 
   ringChart: function (ur, canvasId) {
@@ -400,12 +319,79 @@ Page({
     });
   },
 
-  formatLineChartData: function (datas) {
-    var categories = [];
-    var data = [];
+  usageRateLast12Month: function (usageRates) {
+    var last12Month = [];
 
+    function last12MonthRanges() {
+      var monthRanges = [];
+      for (var i = 0; i < 12; i++) {
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        today = today.getTime();
+        var targetMonthDistance = i + 1;
+        // notice Date().getMonth() start from 0
+        // realmonth = Date().getMonth() + 1
+
+        if (now.getMonth() < targetMonthDistance) {
+          var y = now.getFullYear() - 1;
+          var m = now.getMonth() - targetMonthDistance + 12;
+          var mEnd = m + 1;
+          var yEnd = y;
+          if (mEnd > 11) {
+            mEnd = 0;
+            yEnd = y + 1;
+          }
+        } else {
+          var y = now.getFullYear();
+          var m = now.getMonth() - targetMonthDistance;
+          var yEnd = y;
+          var mEnd = m + 1;
+        }
+        var targetMonthStart = new Date(y, m);
+        targetMonthStart = targetMonthStart.getTime();
+        var targetMonthEnd = new Date(yEnd, mEnd);
+        targetMonthEnd = targetMonthEnd.getTime() - 1000;
+
+        var rangeStart = Math.floor((today - targetMonthEnd) / mSecondsOneDay);
+        var rangeEnd = Math.floor((today - targetMonthStart) / mSecondsOneDay);
+
+        var start = new Date(targetMonthStart);
+        var range = [rangeStart, rangeEnd];
+        var monthString = `${start.getFullYear()}-${start.getMonth() + 1}`;
+        var rangeDesc = { range: range, monthString: monthString };
+
+        monthRanges.push(rangeDesc);
+
+        // var end = new Date(targetMonthEnd);
+        // console.log(`range last ${i + 1} month`);
+        // console.log(range);
+        // console.log(util.dateTimeString(start));
+        // console.log(util.dateTimeString(end));
+      }
+
+      return monthRanges;
+    }
+
+    var monthRanges = last12MonthRanges();
+
+    for (var i = 0; i < monthRanges.length; i++) {
+      var timeRange = monthRanges[i].range;
+      var usageRateRes = this.usageRate(
+        timeRange,
+        this.data.spotnames,
+        this.data.plates
+      );
+      last12Month.push([monthRanges[i].monthString, usageRateRes]);
+      // util.logger(`last ${i + 1} monthString`, monthRanges[i].monthString);
+      // util.logger(`last ${i + 1} month`, ur);
+    }
+
+    usageRates["last12Month"] = last12Month;
+  },
+
+  formatLineChartData: function (datas) {
     var categories = datas.map((x) => x[0]);
-    var data = datas.map((x) => x[1]);
+    var data = datas.map((x) => x[1].ur);
 
     return {
       categories: categories,
@@ -414,11 +400,24 @@ Page({
   },
 
   touchHandler: function (e) {
+    var that = this;
+    var last12MonthData = that.data.usageRates.last12Month;
+    var currentDataIndex = last12MonthlineChart.getCurrentDataIndex(e);
     console.log(last12MonthlineChart.getCurrentDataIndex(e));
     last12MonthlineChart.showToolTip(e, {
       // background: '#7cb5ec',
-      format: function (item, category) {
-        return category + " " + item.name + ":" + item.data;
+      format: function () {
+        // return category + " " + item.name + ":" + item.data;
+        // var info = `${category}
+        // 使用率: ${item.data}
+        // 占用时间: ${last12MonthData[currentDataIndex][1].stayTimeSum}`;
+        var info = [
+          last12MonthData[currentDataIndex][0],
+          `使用率: ${last12MonthData[currentDataIndex][1].ur}`,
+          `占用时间: ${last12MonthData[currentDataIndex][1].stayTimeSum}`,
+        ];
+        console.log(info);
+        return info;
       },
     });
   },
