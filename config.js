@@ -10,9 +10,11 @@ var config = {
     history: "O8jw1C",
     empty_his: "m1JeYR",
     fake_his: "fyfzjB",
+    msgbot_whitelist: "NMnUag",
+    chat_ids: "YjcQcM",
   },
   fakeMode: true,
-  showLoading: true,
+  showLoading: false,
   msgBot: false,
   msgReceiver: {
     open_id: "ou_5f8204530f3c01385c20a4babfc09936",

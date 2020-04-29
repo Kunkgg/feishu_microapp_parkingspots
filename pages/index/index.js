@@ -13,6 +13,8 @@ const config = require("../../config.js").config;
 const sheetIdSpots = config.sheetIds.spots;
 const sheetIdCars = config.sheetIds.cars;
 const sheetIdFakeHistory = config.sheetIds.fake_his;
+const sheetIdMsgBotWhiteList = config.sheetIds.msgbot_whitelist;
+const sheetIdChatIds = config.sheetIds.chat_ids;
 var sheetIdHistory = config.sheetIds.history;
 
 var msgReceiver = config.msgReceiver;
@@ -39,8 +41,11 @@ Page({
     if (this.data.hasLogin) {
       util.logger("Already login");
 
-      that.loadUserInfo();
-      that.loadCloudData();
+      Promise.all([
+        that.loadUserInfo(),
+        that.loadCloudData(),
+        that.loadGroupsInfo(),
+      ]).then(that.updateCloudNewId);
     } else {
       ttClientApi.login(app).then(() => {
         app.globalData.hasLogin = true;
@@ -49,11 +54,18 @@ Page({
         });
         util.logger("Login Success");
 
-        that.loadUserInfo();
-        that.loadCloudData();
+        Promise.all([
+          that.loadUserInfo(),
+          that.loadCloudData(),
+          that.loadGroupsInfo(),
+        ]).then(that.updateCloudNewId);
       });
     }
   },
+
+  // onReady: function () {
+  //   this.updateCloudNewId();
+  // },
 
   onPullDownRefresh: function () {
     console.log("onPullDownRefresh", new Date());
@@ -75,9 +87,14 @@ Page({
   loadUserInfo: function () {
     if (app.globalData.hasUserInfo) {
       util.logger("Already loaded userInfo");
+      var p = new Promise((resolve) => {
+        return resolve("Already loaded userInfo");
+      });
+
+      return p;
     } else {
       // get userInfo
-      ttClientApi.ttGetUserInfo().then((res) => {
+      return ttClientApi.ttGetUserInfo().then((res) => {
         app.globalData.hasUserInfo = true;
         app.globalData.userInfo = res.userInfo;
         util.logger("Loaded userInfo Success", app.globalData.userInfo);
@@ -88,29 +105,26 @@ Page({
   loadSheetMeta: function () {
     var that = this;
 
+    function makeRange(sheetMeta, sheetId) {
+      var sheetIndex = util.sheetIndexById(sheetMeta, sheetId);
+      var lastCol = util.columnCharName(
+        sheetMeta.sheets[sheetIndex].columnCount
+      );
+      var lastRow = sheetMeta.sheets[sheetIndex].rowCount;
+
+      return `${sheetId}!A2:${lastCol}${lastRow}`;
+    }
+
     return ttCloudApi
       .sheetMeta(app.globalData.user_access_token)
       .then((res) => {
         var sheetMeta = res.data.data;
 
-        // make spots and cars sheet range
-        var sheetIndexSpots = util.sheetIndexById(sheetMeta, sheetIdSpots);
-        var lastColSpots = util.columnCharName(
-          sheetMeta.sheets[sheetIndexSpots].columnCount
-        );
-        var lastRowSpots = sheetMeta.sheets[sheetIndexSpots].rowCount;
-
-        var sheetIndexCars = util.sheetIndexById(sheetMeta, sheetIdCars);
-        var lastColCars = util.columnCharName(
-          sheetMeta.sheets[sheetIndexCars].columnCount
-        );
-        var lastRowCars = sheetMeta.sheets[sheetIndexCars].rowCount;
-
-        var rangeSpots = `${sheetIdSpots}!A2:${lastColSpots}${lastRowSpots}`;
-        var rangeCars = `${sheetIdCars}!A2:${lastColCars}${lastRowCars}`;
         var ranges = {
-          spots: rangeSpots,
-          cars: rangeCars,
+          spots: makeRange(sheetMeta, sheetIdSpots),
+          cars: makeRange(sheetMeta, sheetIdCars),
+          msgBotWhiteList: makeRange(sheetMeta, sheetIdMsgBotWhiteList),
+          chatIds: makeRange(sheetMeta, sheetIdChatIds),
         };
 
         that.setData({
@@ -125,20 +139,23 @@ Page({
   },
 
   loadCloudData: function () {
+    // load spots, cars, msgBotWhiteList and chatIds from cloud
     var that = this;
 
     // get sheetMeta for making data ranges
-    that
+    return that
       .loadSheetMeta()
       .then(() => {
-        var rangesSpotsAndCars = [
+        var ranges = [
           that.data.ranges.spots,
           that.data.ranges.cars,
+          that.data.ranges.msgBotWhiteList,
+          that.data.ranges.chatIds,
         ];
         // load data from cloud
         return ttCloudApi.sheetReadRanges(
           app.globalData.user_access_token,
-          rangesSpotsAndCars
+          ranges
         );
       })
       .then((res) => {
@@ -161,7 +178,12 @@ Page({
           cars: res.data.data.valueRanges[1].values,
           plates: plates,
         });
+        app.globalData.msgBotWhiteList = res.data.data.valueRanges[2].values;
+        app.globalData.chatIds = res.data.data.valueRanges[3].values;
+
         util.logger("Loaded data from cloud", that.data);
+        util.logger("msgBotWhiteList", app.globalData.msgBotWhiteList);
+        util.logger("chatIds", app.globalData.chatIds);
 
         if (config.showLoading) {
           // stop loading animate
@@ -636,4 +658,75 @@ Page({
     console.log("Start fake CarOut...");
     this.carOut(0, true);
   },
+
+  isNewId: function (id) {
+    return app.globalData.chatIds.every((element) => element[3] != id);
+  },
+
+  updateCloudNewId: function () {
+    var that = this;
+    var newId = [];
+
+    util.logger("Here is in updateCloudNewId", app.globalData.sheetMeta);
+    var [lastRow, lastCol] = util.sheetSizeById(
+      app.globalData.sheetMeta,
+      sheetIdChatIds
+    );
+    var lastRowTmp = lastRow;
+
+    // get new open_id
+    if (that.isNewId(app.globalData.open_id)) {
+      var newOpenId = [
+        lastRow,
+        app.globalData.userInfo.nickName,
+        "open_id",
+        app.globalData.open_id,
+      ];
+
+      newId.push(newOpenId);
+      lastRow++;
+    }
+
+    // get new chat_id
+    for (let i = 0; i < app.globalData.groupsInfo.length; i++) {
+      if (that.isNewId(app.globalData.groupsInfo[i].chat_id)) {
+        var newChatId = [
+          lastRow,
+          app.globalData.groupsInfo[i].name,
+          "chat_id",
+          app.globalData.groupsInfo[i].chat_id,
+        ];
+
+        newId.push(newChatId);
+        lastRow++;
+      }
+    }
+
+    // update newId to local app
+    app.globalData.chatIds = app.globalData.chatIds.concat(newId);
+
+    // update newId to cloud
+    if (newId.length > 0) {
+      var range = `${sheetIdChatIds}!A${lastRowTmp + 1}:D${lastRow}`;
+
+      ttCloudApi
+        .sheetWriteRange(app.globalData.user_access_token, range, newId)
+        .then((res) => {
+          if (res.data.code == 0) {
+            util.logger("Updated newId Success", res.data);
+          }
+        });
+    } else {
+      util.logger("Don't have any newId");
+    }
+  },
+
+  loadGroupsInfo: function () {
+    // load chatIds of groups which the micro app joined
+    return ttBot.groupList(app.globalData.tenant_access_token).then((res) => {
+      app.globalData.groupsInfo = res.data.data.groups;
+      util.logger("Loaded chat groupsInfo Success", app.globalData.groupsInfo);
+    });
+  },
+  msgBotReceiver: function () {},
 });

@@ -2,6 +2,7 @@ const dwPromisify = require("./dw-request").dwPromisify;
 
 // === Make api Url === {{{
 const apiUrl_sendTextMsg = "https://open.feishu.cn/open-apis/message/v4/send/";
+const apiUrl_groupList = "https://open.feishu.cn/open-apis/chat/v4/list";
 // }}}
 
 function sendTextMsg(access_token, content, receiver) {
@@ -73,7 +74,21 @@ function sendCardMsg(access_token, content, receiver) {
     },
   });
 }
+
+function groupList(tenant_access_token) {
+  var auth = `Bearer ${tenant_access_token}`;
+  return dwPromisify(tt.request)({
+    url: apiUrl_groupList,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+    },
+  });
+}
+
 module.exports = {
   sendTextMsg: sendTextMsg,
   sendCardMsg: sendCardMsg,
+  groupList: groupList,
 };

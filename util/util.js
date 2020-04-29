@@ -101,6 +101,13 @@ function sheetIndexById(sheetMeta, sheetId) {
   }
 }
 
+function sheetSizeById(sheetMeta, sheetId) {
+  var sheetIndex = sheetIndexById(sheetMeta, sheetId);
+  const sheet = sheetMeta.sheets[sheetIndex];
+
+  return [sheet.rowCount, sheet.columnCount];
+}
+
 function sum(input) {
   if (toString.call(input) !== "[object Array]") return false;
 
@@ -146,8 +153,7 @@ module.exports = {
   formatLocation: formatLocation,
   dateTimeString: dateTimeString,
   dateString: dateString,
-  shortTimeString,
-  shortTimeString,
+  shortTimeString: shortTimeString,
   columnCharName: columnCharName,
   sheetIndexById: sheetIndexById,
   logger: logger,
@@ -155,4 +161,5 @@ module.exports = {
   fixLengthString: fixLengthString,
   formatPercent: formatPercent,
   formatTimeZH: formatTimeZH,
+  sheetSizeById: sheetSizeById,
 };

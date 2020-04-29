@@ -15,14 +15,16 @@ App({
     console.log("App Hide");
   },
   globalData: {
-    // hasLogin:            bool
-    // hasUserInfo:         bool
-    // userInfo:            object
-    // hasSheetMeta:        bool
-    // sheetMeta:           object
-    // user_access_token:   string
-    // openid:              string
-    // windowWidth:            number
+    // hasLogin:                bool
+    // hasUserInfo:             bool
+    // userInfo:                object
+    // hasSheetMeta:            bool
+    // sheetMeta:               object
+    // user_access_token:       string
+    // open_id:                 string
+    // chatIds:                 2d-array
+    // msgBotWhiteList          2d-array
+    // windowWidth:             number
     hasLogin: false,
   },
   windowWidth: function () {

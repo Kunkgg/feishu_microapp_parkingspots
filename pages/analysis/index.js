@@ -493,13 +493,3 @@ Page({
     this.onLoad();
   },
 });
-
-// /* background: #fde2e2; */ /* red light */
-// /* background: #faf1d1; */ /* yellow light */
-// /* background: #d9f5d6; */ /* green light */
-// /* background: #e1eaff; */ /* blue light */
-// background: #34c724; /* green */
-// background: #ffc60a; /* yellow */
-// background: #3370ff; /* blue */
-// background: #f5f6f7; /* grey */
-// background: #f54a45; /* red */

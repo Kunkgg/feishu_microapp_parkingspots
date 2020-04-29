@@ -45,6 +45,8 @@ var config = {
     history: "<sheetIdHist>",
     empty_his: "<sheetIdEmptyHist>",
     fake_his: "<sheetIdFakeHist>",
+    msgbot_whitelist: "<sheetIdWhiteList>",
+    chat_ids: "<sheetIdChatIds>",
   },
   fakeMode: true,
   showLoading: true,
@@ -73,6 +75,8 @@ function _test(){
     sheetIdHist="${test_sheetIdHist}"
     sheetIdEmptyHist="${test_sheetIdEmptyHist}"
     sheetIdFakeHist="${test_sheetIdFakeHist}"
+    sheetIdWhiteList="${test_sheetIdWhiteList}"
+    sheetIdChatIds="${test_sheetIdChatIds}"
     receiverIdKind="${test_receiverIdKind}"
     receiverId="${test_receiverId}"
 
@@ -87,6 +91,8 @@ function _deploy(){
     sheetIdHist="${deploy_sheetIdHist}"
     sheetIdEmptyHist="${deploy_sheetIdEmptyHist}"
     sheetIdFakeHist="${deploy_sheetIdFakeHist}"
+    sheetIdWhiteList="${deploy_sheetIdWhiteList}"
+    sheetIdChatIds="${deploy_sheetIdChatIds}"
     receiverIdKind="${deploy_receiverIdKind}"
     receiverId="${deploy_receiverId}"
 
@@ -107,6 +113,8 @@ function _config(){
     sed -i "s/<sheetIdFakeHist>/${sheetIdFakeHist}/" config.js
     sed -i "s/<receiverIdKind>/${receiverIdKind}/" config.js
     sed -i "s/<receiverId>/${receiverId}/" config.js
+    sed -i "s/<sheetIdWhiteList>/${sheetIdWhiteList}/" config.js
+    sed -i "s/<sheetIdChatIds>/${sheetIdChatIds}/" config.js
 }
 
 function _check(){
