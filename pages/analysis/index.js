@@ -17,9 +17,6 @@ var sheetIdHistory = config.sheetIds.history;
 
 const millSecOneDay = 3600 * 24 * 1000;
 
-// TODO: refactor
-// TODO: change the method of computing total time for usage rate
-// TODO: auto generate fake data
 // TODO: display the method of useage rate
 // TODO: introduce of usage
 // TODO: in18

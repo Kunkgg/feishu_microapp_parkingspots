@@ -134,4 +134,5 @@ body {
 
 button {
   margin-right: 5rpx;
+  font-size: 15rpx;
 }

@@ -27,6 +27,7 @@ console.log("-----------------");
 const app = getApp();
 
 // TODO: get chat_id by whitelist
+// TODO: deal with has more than 6 plates, picker
 Page({
   onLoad: function () {
     var that = this;
@@ -487,13 +488,14 @@ Page({
 
   fake: {
     costTime: 5 * 60,
+    currentSpotIndex: 0,
     counter: 0,
     timer: 0,
     step: 0.7,
-    delay: 1.2,
+    delay: 0.9,
   },
 
-  fakeData: function () {
+  fakeLoop: function () {
     var that = this;
 
     var random = Math.random() * that.fake.step;
@@ -507,14 +509,106 @@ Page({
 
       if (that.fake.counter % 2 == 1) {
         console.log("Fake carIn");
-        this.carIn(1, true);
+        this.carIn(that.fake.currentSpotIndex, true);
       } else {
         console.log("Fake carOut");
-        this.carOut(1, true);
+        this.carOut(that.fake.currentSpotIndex, true);
       }
 
-      setTimeout(that.fakeData, (that.fake.delay + random) * 1000);
+      setTimeout(that.fakeLoop, (that.fake.delay + random) * 1000);
+    } else if (that.fake.currentSpotIndex < that.data.spots.length) {
+      if (that.fake.counter % 2 == 0) {
+        this.carOut(that.fake.currentSpotIndex, true);
+      }
+      that.fake.timer = 0;
+      that.fake.counter = 0;
+      that.fake.currentSpotIndex += 1;
+      setTimeout(that.fakeLoop, (that.fake.delay + random) * 1000);
     }
+  },
+
+  fakeClean: function () {
+    var that = this;
+
+    return that
+      .loadSheetMeta()
+      .then(() => {
+        var sheetMeta = app.globalData.sheetMeta;
+        var sheetIndex = util.sheetIndexById(sheetMeta, sheetIdFakeHistory);
+
+        ttCloudApi.sheetDelLines(
+          app.globalData.user_access_token,
+          sheetIdFakeHistory,
+          2,
+          sheetMeta.sheets[sheetIndex].rowCount
+        );
+      })
+      .then(() => {
+        util.logger("Cleaned fake history");
+      });
+  },
+
+  quickFake: function () {
+    var that = this;
+
+    if (config.showLoading) {
+      // start loading animate
+      ttClientApi.ttShowLoading("Faking data...", true);
+    }
+
+    var spotnames = app.globalData.spotnames;
+    var unUsedPlates = that.unUsedPlates();
+    var fakeHist = [];
+    var id = 0;
+
+    for (let i = 0; i < spotnames.length; i++) {
+      that.fake.timer = 0;
+
+      while (that.fake.timer <= that.fake.costTime) {
+        var randomUnUsedPlate =
+          unUsedPlates[Math.floor(Math.random() * unUsedPlates.length)];
+        var item = [
+          ++id,
+          spotnames[i],
+          randomUnUsedPlate,
+          that.fakeDateTime(),
+          "",
+        ];
+
+        var random = Math.random() * that.fake.step;
+        that.fake.timer += random;
+        item[4] = that.fakeDateTime();
+        that.fake.timer += Math.random();
+        fakeHist.push(item);
+      }
+    }
+
+    // util.logger("Quick fake history length", fakeHist.length);
+    // util.logger("Quick fake 1", fakeHist[0]);
+    // util.logger("Quick fake 100", fakeHist[99]);
+    // util.logger("Quick fake 500", fakeHist[499]);
+    // util.logger("Quick fake 1000", fakeHist[999]);
+    // util.logger("Quick fake 2000", fakeHist[1999]);
+
+    var range = `${sheetIdFakeHistory}!A2:E${fakeHist.length + 1}`;
+
+    that.fakeClean().then(() => {
+      ttCloudApi
+        .sheetWriteRange(app.globalData.user_access_token, range, fakeHist)
+        .then((res) => {
+          if (res.data.code == 0) {
+            util.logger(
+              `Quick fake history successed, generated ${fakeHist.length} history items`,
+              res.data
+            );
+
+            if (config.showLoading) {
+              // stop loading animate
+              ttClientApi.ttHideToast();
+            }
+          }
+        });
+    });
   },
 
   fakeDateTime: function () {
@@ -527,7 +621,7 @@ Page({
     );
 
     var dt = util.dateTimeString(dt);
-    console.log(`fake dateTime: ${dt}`);
+    // console.log(`fake dateTime: ${dt}`);
     return dt;
   },
 

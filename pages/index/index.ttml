@@ -5,7 +5,9 @@
 <!-- </view> -->
 
 <view tt:if="{{ fakeMode }}" class="container" style="flex-direction: row;">
-    <button type="primary" bindtap="fakeData">FakeData</button>
+    <button type="primary" bindtap="quickFake">quickFake</button>
+    <button type="primary" bindtap="fakeLoop">FakeLoop</button>
+    <button type="primary" bindtap="fakeClean">FakeClean</button>
     <button type="primary" bindtap="fakeCarIn">FakeCarIn</button>
     <button type="primary" bindtap="fakeCarOut">FakeCarOut</button>
 </view>
