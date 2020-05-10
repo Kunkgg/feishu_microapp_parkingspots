@@ -37,8 +37,8 @@ App({
         this.globalData.windowWidth = windowWidth;
         util.logger("windowWidth", windowWidth);
       } catch (e) {
-        var windowWidth = 320;
-        this.globalData.windowWidth = windowWidth;
+        var winWidth = 320;
+        this.globalData.windowWidth = winWidth;
         util.logger(
           "getSystemInfoSync failed!, using a backup value",
           windowWidth

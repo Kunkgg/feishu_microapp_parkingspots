@@ -1,4 +1,3 @@
-const dwRequest = require("../../util/dw-request.js");
 const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const util = require("../../util/util.js");
@@ -317,7 +316,9 @@ Page({
   },
 
   usageRateLast12Month: function (usageRates) {
+    var that = this;
     var last12Month = [];
+    var monthRanges;
 
     function last12MonthRanges() {
       var monthRanges = [];
@@ -326,39 +327,50 @@ Page({
         var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         today = today.getTime();
         var targetMonthDistance = i + 1;
+        var y, m, yEnd, mEnd;
+        var targetMonthStart,
+          targetMonthEnd,
+          rangeStart,
+          rangeEnd,
+          start,
+          range,
+          yString,
+          mString,
+          monthString,
+          rangeDesc;
         // notice Date().getMonth() start from 0
         // realmonth = Date().getMonth() + 1
 
         if (now.getMonth() < targetMonthDistance) {
-          var y = now.getFullYear() - 1;
-          var m = now.getMonth() - targetMonthDistance + 12;
-          var mEnd = m + 1;
-          var yEnd = y;
+          y = now.getFullYear() - 1;
+          m = now.getMonth() - targetMonthDistance + 12;
+          mEnd = m + 1;
+          yEnd = y;
           if (mEnd > 11) {
             mEnd = 0;
             yEnd = y + 1;
           }
         } else {
-          var y = now.getFullYear();
-          var m = now.getMonth() - targetMonthDistance;
-          var yEnd = y;
-          var mEnd = m + 1;
+          y = now.getFullYear();
+          m = now.getMonth() - targetMonthDistance;
+          yEnd = y;
+          mEnd = m + 1;
         }
-        var targetMonthStart = new Date(y, m);
+        targetMonthStart = new Date(y, m);
         targetMonthStart = targetMonthStart.getTime();
-        var targetMonthEnd = new Date(yEnd, mEnd);
+        targetMonthEnd = new Date(yEnd, mEnd);
         targetMonthEnd = targetMonthEnd.getTime() - 1000;
 
-        var rangeStart = Math.floor((today - targetMonthEnd) / millSecOneDay);
-        var rangeEnd = Math.floor((today - targetMonthStart) / millSecOneDay);
+        rangeStart = Math.floor((today - targetMonthEnd) / millSecOneDay);
+        rangeEnd = Math.floor((today - targetMonthStart) / millSecOneDay);
 
-        var start = new Date(targetMonthStart);
-        var range = [rangeStart, rangeEnd];
-        var yString = start.getFullYear().toString();
-        var mString = (start.getMonth() + 1).toString();
-        var mString = mString[1] ? mString : "0" + mString;
-        var monthString = `${yString}-${mString}`;
-        var rangeDesc = { range: range, monthString: monthString };
+        start = new Date(targetMonthStart);
+        range = [rangeStart, rangeEnd];
+        yString = start.getFullYear().toString();
+        mString = (start.getMonth() + 1).toString();
+        mString = mString[1] ? mString : "0" + mString;
+        monthString = `${yString}-${mString}`;
+        rangeDesc = { range: range, monthString: monthString };
 
         monthRanges.push(rangeDesc);
 
@@ -372,15 +384,16 @@ Page({
       return monthRanges;
     }
 
-    var monthRanges = last12MonthRanges();
+    monthRanges = last12MonthRanges();
 
     for (var i = 0; i < monthRanges.length; i++) {
       var timeRange = monthRanges[i].range;
-      var usageRateRes = this.usageRate(
+      var usageRateRes = that.usageRate(
         timeRange,
-        this.data.spotnames,
-        this.data.plates
+        that.data.spotnames,
+        that.data.plates
       );
+
       last12Month.push([monthRanges[i].monthString, usageRateRes]);
       // util.logger(`last ${i + 1} monthString`, monthRanges[i].monthString);
       // util.logger(`last ${i + 1} month`, ur);

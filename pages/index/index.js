@@ -1,4 +1,3 @@
-const dwRequest = require("../../util/dw-request.js");
 const ttCloudApi = require("../../util/tt-cloudApi.js");
 const ttClientApi = require("../../util/tt-clientApi.js");
 const ttBot = require("../../util/tt-msgbot");
@@ -218,10 +217,11 @@ Page({
   },
 
   _setSpotDateTime: function (spot, fake = false) {
+    var dateTime;
     if (fake) {
-      var dateTime = this.fakeDateTime();
+      dateTime = this.fakeDateTime();
     } else {
-      var dateTime = util.dateTimeString();
+      dateTime = util.dateTimeString();
     }
 
     spot[5] = dateTime;
@@ -265,31 +265,37 @@ Page({
   },
 
   makePopHistoryParams: function (targetIndex, sheetMeta, fake = false) {
+    var popTime,
+      sheetIndex,
+      spot,
+      lastColHist,
+      targetUnitPosition,
+      rangeHist,
+      valuesHist,
+      d;
     if (fake) {
-      var popTime = this.fakeDateTime();
+      popTime = this.fakeDateTime();
       sheetIdHistory = sheetIdFakeHistory;
     } else {
-      var popTime = util.dateTimeString();
+      popTime = util.dateTimeString();
       sheetIdHistory = config.sheetIds.history;
     }
 
-    var sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
+    sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
 
-    var spot = this.data.spots[targetIndex];
-    var lastColHist = util.columnCharName(
-      sheetMeta.sheets[sheetIndex].columnCount
-    );
+    spot = this.data.spots[targetIndex];
+    lastColHist = util.columnCharName(sheetMeta.sheets[sheetIndex].columnCount);
     if (spot[6] != 0 && spot[6] != null && spot[6] != "" && spot[6]) {
-      var targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
-      var rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
+      targetUnitPosition = `${lastColHist}${spot[6] + 1}`;
+      rangeHist = `${sheetIdHistory}!${targetUnitPosition}:${targetUnitPosition}`;
     } else {
       util.logger("Get pop history failed");
       return "";
     }
 
-    var valuesHist = [[popTime]];
+    valuesHist = [[popTime]];
 
-    var d = { rangeHist: rangeHist, valuesHist: valuesHist };
+    d = { rangeHist: rangeHist, valuesHist: valuesHist };
     util.logger("Pop history params", d);
 
     return d;
@@ -310,25 +316,27 @@ Page({
     var prompt_title = "确认提示";
     var prompt_content = `将牌照 ${spot[2]} 车辆移出车位 ${spot[1]} ?`;
     var userInfo = app.globalData.userInfo;
+    var selectConfirm;
 
     console.log("Here is carOut...");
     console.log(`targetIndex: ${targetIndex}`);
 
     if (fake) {
-      var selectConfirm = this.autoConfirm;
+      selectConfirm = this.autoConfirm;
     } else {
-      var selectConfirm = ttClientApi.ttShowModal;
+      selectConfirm = ttClientApi.ttShowModal;
     }
 
     selectConfirm(prompt_title, prompt_content).then(({ confirm, cancel }) => {
+      var popHisParams, moveInfo;
       if (confirm) {
-        var popHisParams = that.makePopHistoryParams(
+        popHisParams = that.makePopHistoryParams(
           targetIndex,
           app.globalData.sheetMeta,
           fake
         );
 
-        var moveInfo = `${userInfo.nickName}刚刚将牌照 [${spot[2]}] 车辆**移出**车位 [${spot[1]}]`;
+        moveInfo = `${userInfo.nickName}刚刚将牌照 [${spot[2]}] 车辆**移出**车位 [${spot[1]}]`;
         that.setSpots(targetIndex, "", "pop", fake);
 
         if (popHisParams != "") {
@@ -349,28 +357,33 @@ Page({
     plate,
     fake = false
   ) {
+    var pushTime,
+      sheetIndex,
+      lastColHist,
+      lastRowHist,
+      rangeHist,
+      valuesHist,
+      d;
     if (fake) {
-      var pushTime = this.fakeDateTime();
+      pushTime = this.fakeDateTime();
       sheetIdHistory = sheetIdFakeHistory;
     } else {
-      var pushTime = util.dateTimeString();
+      pushTime = util.dateTimeString();
       sheetIdHistory = config.sheetIds.history;
     }
 
-    var sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
+    sheetIndex = util.sheetIndexById(sheetMeta, sheetIdHistory);
 
     // make history sheet range
-    var lastColHist = util.columnCharName(
-      sheetMeta.sheets[sheetIndex].columnCount
-    );
-    var lastRowHist = sheetMeta.sheets[sheetIndex].rowCount + 1;
-    var rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
+    lastColHist = util.columnCharName(sheetMeta.sheets[sheetIndex].columnCount);
+    lastRowHist = sheetMeta.sheets[sheetIndex].rowCount + 1;
+    rangeHist = `${sheetIdHistory}!A${lastRowHist}:${lastColHist}${lastRowHist}`;
 
-    var valuesHist = [
+    valuesHist = [
       [lastRowHist - 1, this.data.spots[targetIndex][1], plate, pushTime],
     ];
 
-    var d = { rangeHist: rangeHist, valuesHist: valuesHist };
+    d = { rangeHist: rangeHist, valuesHist: valuesHist };
     util.logger("Push history params", d);
 
     return d;
@@ -389,6 +402,8 @@ Page({
   carIn: function (targetIndex, fake = false) {
     var that = this;
     var unUsedPlates = that.unUsedPlates();
+    var userInfo, selectPlate;
+
     if (unUsedPlates.length == 0) {
       ttClientApi
         .ttShowModal("提示", "没有可用的车牌", "确定", "取消", false)
@@ -397,15 +412,15 @@ Page({
           return;
         });
     } else {
-      var userInfo = app.globalData.userInfo;
+      userInfo = app.globalData.userInfo;
 
       console.log("Here is carIn...");
       console.log(`targetIndex: ${targetIndex}`);
 
       if (fake) {
-        var selectPlate = that.randomPlateIndex;
+        selectPlate = that.randomPlateIndex;
       } else {
-        var selectPlate = ttClientApi.ttShowActionSheet;
+        selectPlate = ttClientApi.ttShowActionSheet;
       }
 
       Promise.all([selectPlate(unUsedPlates), that.loadSheetMeta()]).then(
@@ -572,32 +587,28 @@ Page({
 
   quickFake: function () {
     var that = this;
+    var spotnames = app.globalData.spotnames;
+    var unUsedPlates = that.unUsedPlates();
+    var fakeHist = [];
+    var id = 0;
+    var range;
 
     if (config.showLoading) {
       // start loading animate
       ttClientApi.ttShowLoading("Faking data...", true);
     }
 
-    var spotnames = app.globalData.spotnames;
-    var unUsedPlates = that.unUsedPlates();
-    var fakeHist = [];
-    var id = 0;
-
     for (let i = 0; i < spotnames.length; i++) {
       that.fake.timer = 0;
 
       while (that.fake.timer <= that.fake.costTime) {
-        var randomUnUsedPlate =
-          unUsedPlates[Math.floor(Math.random() * unUsedPlates.length)];
-        var item = [
-          ++id,
-          spotnames[i],
-          randomUnUsedPlate,
-          that.fakeDateTime(),
-          "",
-        ];
+        var randomUnUsedPlate, item, random;
 
-        var random = Math.random() * that.fake.step;
+        randomUnUsedPlate =
+          unUsedPlates[Math.floor(Math.random() * unUsedPlates.length)];
+        item = [++id, spotnames[i], randomUnUsedPlate, that.fakeDateTime(), ""];
+
+        random = Math.random() * that.fake.step;
         that.fake.timer += random;
         item[4] = that.fakeDateTime();
         that.fake.timer += Math.random();
@@ -612,7 +623,7 @@ Page({
     // util.logger("Quick fake 1000", fakeHist[999]);
     // util.logger("Quick fake 2000", fakeHist[1999]);
 
-    var range = `${sheetIdFakeHistory}!A2:E${fakeHist.length + 1}`;
+    range = `${sheetIdFakeHistory}!A2:E${fakeHist.length + 1}`;
 
     that.fakeClean().then(() => {
       ttCloudApi
@@ -636,15 +647,15 @@ Page({
   fakeDateTime: function () {
     var now = new Date();
     var yearAgo = new Date();
-    var yearAgo = yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+    var dt;
 
-    var dt = new Date(
+    yearAgo = yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+    dt = new Date(
       ((now - yearAgo) * this.fake.timer) / this.fake.costTime + yearAgo
     );
 
-    var dt = util.dateTimeString(dt);
     // console.log(`fake dateTime: ${dt}`);
-    return dt;
+    return util.dateTimeString(dt);
   },
 
   fakeCarIn: function () {
