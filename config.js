@@ -1,4 +1,4 @@
-const sheetToken = "shtcniUwsF4rGBfJTenE7JuNmWg";
+const sheetToken = "shtcnTNuG88jU9y2Ldfp9ZgjjUb";
 const folderToken = "fldcnQ7Qa7RosZTqvzaHveun0og";
 
 var config = {
@@ -7,17 +7,17 @@ var config = {
   sheetIds: {
     spots: "5a3db1",
     cars: "pcnBE5",
-    history: "O8jw1C",
-    empty_his: "m1JeYR",
-    fake_his: "fyfzjB",
-    msgbot_whitelist: "NMnUag",
-    chat_ids: "YjcQcM",
+    history: "2k97WA",
+    empty_his: "MxrYrB",
+    fake_his: "efOlXV",
+    msgbot_whitelist: "AR7UbN",
+    chat_ids: "v8hpjv",
   },
-  fakeMode: true,
+  fakeMode: false,
   showLoading: true,
   msgBot: true,
   msgReceiver: {
-  open_id: "ou_5f8204530f3c01385c20a4babfc09936",
+    chat_id: "oc_1f5ac5bd6569328f5db6819ad207d5bd",
   },
 };
 

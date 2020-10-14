@@ -65,6 +65,7 @@ Page({
     plates: app.globalData.plates,
     fakeMode: config.fakeMode,
     ringChartRanges: [3, 7, 30, 365],
+    oldSpotnames: ["D-100", "D-101"],
   },
 
   loadSheetMeta: function () {
@@ -193,21 +194,21 @@ Page({
       return outTime - inTime;
     }
 
-    var targetHisList = that.data.history.filter((x) => {
-      var d1 = new Date(x[3]);
-      var d2 = new Date(x[4]);
+    var targetHisList = that.data.history.filter((histItem) => {
+      var d1 = new Date(histItem[3]);
+      var d2 = new Date(histItem[4]);
 
       return (
         d1.getTime() <= endRangeTime &&
         d2.getTime() >= startRangeTime &&
-        spots.includes(x[1]) &&
-        plates.includes(x[2])
+        spots.includes(histItem[1]) &&
+        plates.includes(histItem[2])
       );
     });
 
     var stayTimeSum = util.sum(
-      targetHisList.map((x) =>
-        stayTime(x[3], x[4], startRangeTime, endRangeTime)
+      targetHisList.map((histItem) =>
+        stayTime(histItem[3], histItem[4], startRangeTime, endRangeTime)
       )
     );
 
@@ -253,9 +254,10 @@ Page({
     var rangeStart = 1;
     var rangeEnd = nDays;
     var timeRange = [rangeStart, rangeEnd];
+    var targetSpotnames = this.data.spotnames.concat(this.data.oldSpotnames);
     var usageRateRes = this.usageRate(
       timeRange,
-      this.data.spotnames,
+      targetSpotnames,
       this.data.plates
     );
     // util.logger(`last ${rangeStart} to last ${rangeEnd}`, ur);
@@ -319,6 +321,7 @@ Page({
     var that = this;
     var last12Month = [];
     var monthRanges;
+    var targetSpotnames = this.data.spotnames.concat(this.data.oldSpotnames);
 
     function last12MonthRanges() {
       var monthRanges = [];
@@ -390,7 +393,7 @@ Page({
       var timeRange = monthRanges[i].range;
       var usageRateRes = that.usageRate(
         timeRange,
-        that.data.spotnames,
+        targetSpotnames,
         that.data.plates
       );
 
