@@ -1,0 +1,124 @@
+= Parking spots 飞书小程序
+:author: Goukun <goukun07@gmail.com>
+:date: 2020-10-18
+// :toc:
+:icons: font
+:library: Asciidoctor
+// ifdef::asciidoctor[]
+// :source-highlighter: coderay
+// endif::asciidoctor[]
+:idprefix:
+// :stylesheet: ../../resources/asciidoctor.css
+:imagesdir: images
+:includesdir: includes
+//:title-logo-image: image:logo.png[pdfwidth=3.00in,align=center]
+//:backend: docbook45
+//:backend: html5
+//:doctype: book
+//:sectids!:
+:plus: &#43;
+//:revealjsdir: ../../resources/reveal.js
+//:revealjs_theme: black
+// available themes: black beige blood league moon night serif simple sky solarized white
+
+// refs
+:url-github: https://github.com/Kunkgg
+:url-sheet-parkingspots: https://c2llmknc1e.feishu.cn/sheets/shtcnTNuG88jU9y2Ldfp9ZgjjUb?sheet=5a3db1
+//:url-blog: http-to-my-blog
+
+该小程序用于建衡技术公司内部共享车位信息，并统计车位使用率。
+
+== 原理
+
+将车位状态、公司车辆牌照及停车历史记录等信息存储在
+{url-sheet-parkingspots}[Parkingspots共享表格]。
+
+公司内成员对该表格都有读写权限。
+
+在小程序中进行的车辆移入、移出车库操作会通过飞书小程序 API 实时编辑该共享表格,
+修改车位状态并生成停车历史记录。
+
+[IMPORTANT]
+====
+非管理人员对该共享表格的操作应该完全通过小程序实现，不要直接手动编辑该表格，
+否则可能造成小程序工作异常。
+====
+
+== 子表介绍
+
+=== spots 子表
+
+用于记录当前车位状态，每行表示一个车位。
+
+管理员如需添加、删除或修改车位，只需在表格中插入、删除或编辑对应的行。
+
+==== 字段说明
+
+* id: 小程序中车位的唯一标识序号，大写字母 P 开头， 从 P1 开始依次递增，禁止重复。
+* name: 车位名称或实际中的编号。
+* status: 车位状态，当为空时小程序中对应车位显示空闲。
+否则显示该字段内容（车牌号）, 并标记车位为已占用。
+* lastEditor: 最后对该车位状态进行编辑的人员姓名。
+* lastEditorAvatar: 最后对该车位状态进行编辑的人员头像链接。
+* mtime: 该车位的最后编辑时间。
+* lastHistoryId: 辅助列，用于辅助生成停车历史记录。
+
+==== 添加车位
+
+手动编辑共享表格，在 spots 子表末尾插入新行，填写 `id`、`name`
+两个字段，其余字段为空。
+
+==== 删除车位
+
+删除 spots 子表中对应的行。
+
+==== 修改车位名称
+
+修改 spots 子表中对应行的 `name` 字段。
+
+[IMPORTANT]
+====
+所有手动修改，保存表格后刷新小程序生效。
+
+应确保表的末尾和右侧没有无效的空行或空列。
+====
+
+=== cars 子表
+
+用于记录公司车辆牌照信息，每行表示一个车辆牌照。
+
+与管理车位信息一样，
+管理员如需添加、删除或修改车辆牌照，只需在表格中插入、删除或编辑对应的行。
+
+==== 字段说明
+
+* id: 小程序中车辆牌照的唯一标识序号，大写字母 C 开头，从 C1
+开始依次递增，禁止重复。
+* plate: 车辆牌照。
+
+=== history 子表
+
+停车历史记录，小程序自动生成，不得手动编辑。
+
+车位使用率根据该表计算得到。
+
+=== empty_his 子表
+
+辅助子表，用于快速清空历史记录，不得手动编辑。
+
+=== fake_his 子表
+
+用于生成测试用的历史记录，不得手动编辑。
+
+=== msgbot_whitelist
+
+用于控制消息机器人的接收人列表。
+
+当车位状态更新时，在该表中的人员或聊天会话可接收到消息机器人推送的提示卡片。
+
+=== chat_ids
+
+辅助子表，用于记录潜在的消息机器人发送对象。
+使用过该小程序的人员 id 被自动记录在该表中。
+
+小程序自动生成，不得手动编辑。
