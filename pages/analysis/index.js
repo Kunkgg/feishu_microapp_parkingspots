@@ -216,8 +216,14 @@ Page({
       return 0;
     }
 
+    // TODO: This is a wrong tempary totalTime <18-10-20, gk07> //
+    // To get the right totalTime, need add a new table which records the count
+    // of spots and modify time.
+    // Here just use the current count of spots. It's wrong.
     var totalTime =
-      (daysRange[1] - daysRange[0] + 1) * millSecOneDay * spots.length;
+      (daysRange[1] - daysRange[0] + 1) *
+      millSecOneDay *
+      that.data.spotnames.length; // Temporary, wrong.
 
     return {
       ur: stayTimeSum / totalTime,
