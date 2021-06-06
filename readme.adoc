@@ -26,7 +26,9 @@
 :url-sheet-parkingspots: https://c2llmknc1e.feishu.cn/sheets/shtcnTNuG88jU9y2Ldfp9ZgjjUb?sheet=5a3db1
 //:url-blog: http-to-my-blog
 
-该小程序用于建衡技术公司内部共享车位信息，并统计车位使用率。
+该小程序用于某小型技术公司内部共享车位信息，统计车位使用率。
+
+image:feishu_parking_spots_screenshot.png[feishu_parking_spots_screenshot.png]
 
 == 原理
 
